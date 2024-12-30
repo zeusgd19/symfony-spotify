@@ -1,0 +1,243 @@
+html, body {
+    height: 100%;
+    margin: 2px;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+#app {
+    display: grid;
+    grid-template-areas:
+    'aside main main'
+    'play play play';
+    grid-template-columns: 50px 1fr;
+    grid-template-rows: 1fr auto;
+    height: 100vh;
+    gap: 10px;
+}
+
+aside {
+    grid-area: aside;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    gap: 10px;
+    transition: width 0.3s;
+    overflow-y: auto;
+}
+
+aside::-webkit-scrollbar {
+    display: none;
+}
+
+.hidden{
+    transition: width 0.3s;
+    width: 350px !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#menu {
+    background-color: #121212;
+    border-radius: 5px;
+    width: 350px;
+    padding: 2px;
+}
+
+#hamburguer {
+    background-color: #121212;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+}
+
+#hamburguer:hover {
+    background-color: #383737;
+}
+
+#library {
+    background-color: #121212;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+#playlists li:hover {
+    background-color: #383737;
+    border-radius: 10px;
+}
+
+img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    margin: 5px;
+}
+
+#playlists li {
+    display: flex;
+}
+
+p {
+    color: white;
+}
+
+.playlistInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.playlistInfo p:last-of-type {
+    font-size: 12px;
+    color: #555555;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 15px;
+}
+
+li {
+    list-style: none;
+}
+
+a {
+    display: flex;
+    gap: 10px;
+    text-decoration: none;
+    color: white;
+}
+
+/* MAIN - Habilitar scroll si las canciones ocupan mucho espacio */
+main {
+    grid-area: main;
+    background-color: #121212;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Permite scroll vertical */
+    padding: 10px;
+}
+
+/* Limitar el alto de las canciones para evitar que sobrepasen el contenedor */
+#songs {
+    max-height: calc(100vh - 200px); /* Limita la altura y deja espacio para el footer */
+    overflow-y: auto; /* Scroll solo si hay muchas canciones */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#songs li:hover {
+    background-color: #383737;
+}
+
+audio {
+    display: none;
+}
+
+footer {
+    height: 100px;
+    grid-area: play;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+footer div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button {
+    width: 50px;
+    height: 50px;
+    border-radius: 999999px;
+}
+
+#slideController {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 700px;
+    justify-content: space-between;
+}
+
+#slider {
+    flex-grow: 1;
+    margin: 15px;
+    width: 700px;
+}
+
+#tiempoRecorrido, #tiempoTotal {
+    width: auto;
+    text-align: center;
+    color: white;
+}
+
+/* Media Queries para Responsividad */
+
+/* Para pantallas medianas (tablets) */
+@media screen and (max-width: 768px) {
+    #app {
+        grid-template-columns: 60px 1fr;
+        grid-template-areas:
+        'aside main'
+        'play play';
+    }
+    aside {
+        width: 60px; /* Más pequeño en pantallas medianas */
+    }
+    #menu {
+        width: 280px;
+    }
+    img {
+        width: 60px;
+        height: 60px;
+    }
+    footer {
+        height: 80px;
+    }
+    button {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Para pantallas pequeñas (móviles) */
+@media screen and (max-width: 480px) {
+    #app {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+        'main'
+        'play';
+    }
+    aside {
+        display: none; /* Ocultar aside en pantallas pequeñas */
+    }
+    #menu {
+        width: 100%;
+        padding: 10px;
+    }
+    img {
+        width: 50px;
+        height: 50px;
+    }
+    #playlists li {
+        flex-direction: column; /* Cambiar a columna en móviles */
+    }
+    p {
+        font-size: 0.9em;
+    }
+    footer {
+        height: 60px;
+    }
+    button {
+        width: 30px;
+        height: 30px;
+    }
+}
