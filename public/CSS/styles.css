@@ -183,6 +183,11 @@ button {
     display: none;
 }
 
+
+#menuMobileList {
+    display: none;
+}
+
 /* Media Queries para Responsividad */
 
 /* Para pantallas medianas (tablets) */
