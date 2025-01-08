@@ -179,6 +179,10 @@ button {
     color: white;
 }
 
+#menuMobile {
+    display: none;
+}
+
 /* Media Queries para Responsividad */
 
 /* Para pantallas medianas (tablets) */
@@ -214,10 +218,34 @@ button {
         grid-template-columns: 1fr;
         grid-template-areas:
         'main'
-        'play';
+        'play'
+        'aside';
     }
     aside {
         display: none; /* Ocultar aside en pantallas pequeñas */
+    }
+    #menuMobile {
+        display: block;
+        text-align: center;
+        background-color: #383737;
+        width: 100%;
+        margin: 0;
+    }
+    #menuMobileList{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        background-color: #383737;
+        color: white;
+    }
+
+    #menuMobileList li {
+        list-style: none;
+    }
+
+    #menuMobileList li:hover {
+        background-color: #121212;
+        border-radius: 10px;
     }
     #menu {
         width: 100%;
@@ -234,7 +262,12 @@ button {
         font-size: 0.9em;
     }
     footer {
-        height: 60px;
+        height: 70px;
+        width: 100%
+    }
+
+    #slideController {
+        width: 300px;
     }
     button {
         width: 30px;

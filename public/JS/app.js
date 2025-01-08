@@ -43,6 +43,18 @@ $(document).ready(function () {
                     </li>`);
                 $playlistUl.append($li);
             });
+        } else {
+            $songsUl.empty();
+            playLists.forEach(playList => {
+                const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
+                        <img src="${playList.cover}" alt="Cover playlist">
+                        <div class="playlistInfo">
+                            <p>${playList.title}</p>
+                            <p>Artists: ${playList.artists.join(', ')}</p>
+                        </div>
+                    </li>`);
+                $songsUl.append($li);
+            });
         }
     }
 
