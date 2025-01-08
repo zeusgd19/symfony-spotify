@@ -7,6 +7,7 @@ use App\Entity\Playlist;
 use App\Entity\Song;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api', name: 'api_')]
@@ -39,7 +40,9 @@ class PlayListController extends AbstractController
             $data[] = $info;
         }
 
-        return $this->json($data);
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 
     #[Route('/songs', name: 'songs')]
@@ -80,6 +83,8 @@ class PlayListController extends AbstractController
             $data[] = $info;
         }
 
-        return $this->json($data);
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 }
