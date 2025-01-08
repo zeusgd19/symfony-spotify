@@ -119,6 +119,7 @@ $(document).ready(function () {
         })
 
          if ($liElement.length) {
+            $songsUl.empty();
              renderSongs();
          }
     }
