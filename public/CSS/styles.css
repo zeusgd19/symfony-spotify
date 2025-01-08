@@ -223,13 +223,14 @@ button {
         grid-template-columns: 1fr;
         grid-template-areas:
         'main'
-        'play'
-        'aside';
+        'aside'
+        'play';
     }
     aside {
         display: none; /* Ocultar aside en pantallas pequeñas */
     }
     #menuMobile {
+        grid-area: aside;
         display: block;
         text-align: center;
         background-color: #383737;
