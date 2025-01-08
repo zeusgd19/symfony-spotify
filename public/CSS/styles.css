@@ -12,7 +12,7 @@ html, body {
     'play play play';
     grid-template-columns: 50px 1fr;
     grid-template-rows: 1fr auto;
-    height: 100vh;
+    height: 100dvh;
     gap: 10px;
 }
 
@@ -234,7 +234,7 @@ button {
         display: block;
         text-align: center;
         background-color: #383737;
-        width: 100%;
+        width: 100dvw;
         margin: 0;
     }
     #menuMobileList{
@@ -254,7 +254,7 @@ button {
         border-radius: 10px;
     }
     #menu {
-        width: 100%;
+        width: 100dvw;
         padding: 10px;
     }
     img {

@@ -43,7 +43,7 @@ $(document).ready(function () {
                     </li>`);
                 $playlistUl.append($li);
             });
-        } else {
+        } else if(window.innerWidth <= 480) {
             $songsUl.empty();
             playLists.forEach(playList => {
                 const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
@@ -99,34 +99,42 @@ $(document).ready(function () {
 
     // Función para actualizar el DOM de la lista de canciones
      function setSongsForPlayList(ev) {
-        const $liElement = $(ev.target).closest('li');
+        if(!$(ev.target).closest("li").data('title')){
+            const $liElement = $(ev.target).closest('li');
 
-        $.ajax({
-            type: 'POST',
-            url: '/api/songs',
-            data: JSON.stringify({PlayListId: $liElement.data('id')}),
-            beforeSend: function(){
-                $songsUl.append('<img src="/img/loading.gif"/>')
-            },
-            success: function (data){
-                songs = data;
-                console.log(songs)
+            $.ajax({
+                type: 'POST',
+                url: '/api/songs',
+                data: JSON.stringify({PlayListId: $liElement.data('id')}),
+                beforeSend: function(){
+                    $songsUl.append('<img src="/img/loading.gif"/>')
+                },
+                success: function (data){
+                    songs = data;
+                    console.log(songs)
+                    renderSongs();
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            })
+
+            if ($liElement.length) {
+                $songsUl.empty();
                 renderSongs();
-            },
-            error: function(error){
-                console.log(error);
             }
-        })
-
-         if ($liElement.length) {
-            $songsUl.empty();
-             renderSongs();
-         }
+        } else {
+            setAudioPlayerForSong(ev);
+        }
     }
 
     // Manejar el click en cada playList
-    $playlistUl.on('click', 'li', setSongsForPlayList);
-
+    if(window.innerWidth > 480){
+        $playlistUl.on('click', 'li', setSongsForPlayList);
+        $songsUl.on('click', 'li', setAudioPlayerForSong);
+    } else {
+        $songsUl.on('click', 'li', setSongsForPlayList);
+    }
     // Función para actualizar el DOM del reproductor de audio
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');
@@ -168,7 +176,6 @@ $(document).ready(function () {
     }
 
     // Manejar el click en cada canción
-    $songsUl.on('click', 'li', setAudioPlayerForSong);
 
     // Función para manejar el botón de reproducción
     function getPlayer(ev) {
