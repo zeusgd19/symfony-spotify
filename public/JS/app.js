@@ -129,6 +129,7 @@ $(document).ready(function () {
     }
 
     // Manejar el click en cada playList
+<<<<<<< HEAD
     if(!$menu.hasClass('hidden')){
         $playlistUl.on('click', 'li', setSongsForPlayList);
     } else {
@@ -136,6 +137,14 @@ $(document).ready(function () {
     }
     
 
+=======
+    if(window.innerWidth > 480){
+        $playlistUl.on('click', 'li', setSongsForPlayList);
+        $songsUl.on('click', 'li', setAudioPlayerForSong);
+    } else {
+        $songsUl.on('click', 'li', setSongsForPlayList);
+    }
+>>>>>>> 83530ce4390ef3edec568cd50664c63515bffde4
     // Función para actualizar el DOM del reproductor de audio
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');
