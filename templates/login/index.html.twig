@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('CSS/login.css') }}">
+    <script src="{{ asset('JS/login.js') }}"></script>{% endblock %}
+{% block title %}Login Spotify Clone{% endblock %}
+{% block body %}
+    <header>
+        <img src="{{ asset('img/spotify.svg') }}">
+        <h1 class="title">Log in to Spotify</h1>
+    </header>
+
+    <div class="container-continue">
+        <button class="log-with">
+            <img src="{{ asset('img/google.svg') }}" alt="google-logo">
+            <p>Continue with Google</p>
+        </button>
+        <button class="log-with">
+            <img src="{{ asset('img/facebook.svg') }}" alt="facebook-logo">
+            <p>Continue with Facebook</p>
+        </button>
+        <button class="log-with">
+            <img src="{{ asset('img/apple.svg') }}" alt="apple-logo">
+            <p>Continue with Apple</p>
+        </button>
+    </div>
+
+    <div class="container-login">
+        <button class="log-with spotify-log">Log in to Spotify</button>
+    </div>
+{% endblock %}

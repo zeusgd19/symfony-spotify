@@ -1,7 +1,10 @@
 {% extends 'base.html.twig' %}
-{% block head %}{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('CSS/styles.css') }}">
+    <script src="{{ asset('JS/app.js') }}"></script>{% endblock %}
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
+<img src="{{ imagen }}" alt="" class="profile-pic">
 <div id="app">
     <aside>
         <div id="hamburguer">
