@@ -5,24 +5,24 @@ html, body {
     overflow: hidden;
 }
 
-
-.profile-pic {
-    display: flex;
-    justify-self: end;
-    width: 30px;
-    height: 30px;
-    margin-right: 30px;
-}
-
 #app {
     display: grid;
     grid-template-areas:
+    'profile profile profile'
     'aside main main'
     'play play play';
     grid-template-columns: 50px 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-rows:1px 1fr 140px;
     height: 100dvh;
     gap: 10px;
+}
+
+.profile-pic {
+    display: flex;
+    grid-area: profile;
+    width: 30px;
+    height: 30px;
+    margin-left: 98dvw;
 }
 
 aside {
