@@ -41,7 +41,7 @@ class PlayListController extends AbstractController
         }
 
         $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+	$response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
 

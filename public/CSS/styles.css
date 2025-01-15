@@ -233,6 +233,11 @@ button {
         grid-template-areas:
         'main'
         'play';
+        grid-template-rows: 1fr 80px;
+    }
+
+    .profile-pic {
+    	margin-left: 90dvw;
     }
     aside {
         display: none; /* Ocultar aside en pantallas pequeñas */
@@ -242,7 +247,7 @@ button {
         text-align: center;
         background-color: #383737;
         width: 100dvw;
-        margin: 0;
+        margin-bottom: 40px;
     }
     #menuMobileList{
         display: flex;
