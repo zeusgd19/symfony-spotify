@@ -12,7 +12,7 @@ html, body {
     'aside main main'
     'play play play';
     grid-template-columns: 50px 1fr;
-    grid-template-rows:1px 1fr 140px;
+    grid-template-rows:1px 1fr 160px;
     height: 100dvh;
     gap: 10px;
 }
@@ -22,7 +22,7 @@ html, body {
     grid-area: profile;
     width: 30px;
     height: 30px;
-    margin-left: 98dvw;
+    justify-self: end;
 }
 
 aside {
@@ -162,7 +162,7 @@ footer div {
     align-items: center;
 }
 
-button {
+#player {
     width: 50px;
     height: 50px;
     border-radius: 999999px;
@@ -206,6 +206,7 @@ button {
         grid-template-areas:
         'aside main'
         'play play';
+        grid-template-rows: 1fr 140px;
     }
     aside {
         width: 60px; /* Más pequeño en pantallas medianas */
@@ -218,11 +219,16 @@ button {
         height: 60px;
     }
     footer {
-        height: 80px;
+        height: 10dvh;
+        width: 100%
     }
-    button {
-        width: 40px;
-        height: 40px;
+    #slideController {
+        height: 5dvh;
+        width: 300px;
+    }
+    #player {
+        width: 30px;
+        height: 30px;
     }
 }
 
@@ -237,7 +243,7 @@ button {
     }
 
     .profile-pic {
-    	margin-left: 90dvw;
+    	justify-self: end;
     }
     aside {
         display: none; /* Ocultar aside en pantallas pequeñas */
@@ -247,7 +253,7 @@ button {
         text-align: center;
         background-color: #383737;
         width: 100dvw;
-        margin-bottom: 40px;
+        margin-bottom: 60px;
     }
     #menuMobileList{
         display: flex;
@@ -287,7 +293,7 @@ button {
         height: 5dvh;
         width: 300px;
     }
-    button {
+    #player {
         width: 30px;
         height: 30px;
     }

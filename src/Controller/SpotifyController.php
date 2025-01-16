@@ -14,7 +14,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class SpotifyController extends AbstractController
 {
 
-    private string $redirectUri = 'http://spotifyclone.shop/callback';
+    private string $redirectUri = 'http://localhost:8000/callback';
     private string $scopes = 'user-read-email user-read-private playlist-read-private';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
@@ -42,14 +42,12 @@ class SpotifyController extends AbstractController
     {
         $clientId = $this->getParameter('clientId');
         $clientSecret = $this->getParameter('clientSecret');
-        // Recibir el "code" enviado por Spotify
         $code = $request->query->get('code');
 
         if (!$code) {
             return new Response('', Response::HTTP_FORBIDDEN);
         }
 
-        // Hacer una solicitud para intercambiar el código por un access token
         $response = $this->httpClient->request('POST', 'https://accounts.spotify.com/api/token', [
             'body' => [
                 'grant_type' => 'authorization_code',
@@ -63,12 +61,10 @@ class SpotifyController extends AbstractController
         $data = json_decode($response->getContent(), true);
 
         if (isset($data['access_token'])) {
-            // Obtener el Access Token y el Refresh Token
             $accessToken = $data['access_token'];
             $refreshToken = $data['refresh_token'];
             $expiresIn = $data['expires_in'] ?? 3600;
 
-            // Hacer una solicitud para obtener la información del usuario
             $userResponse = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,

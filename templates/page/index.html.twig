@@ -1,10 +1,16 @@
 {% extends 'base.html.twig' %}
 {% block head %}
     <link rel="stylesheet" href="{{ asset('CSS/styles.css') }}">
-    <script src="{{ asset('JS/app.js') }}"></script>{% endblock %}
+    <link rel="stylesheet" href="{{ asset('CSS/login.css') }}">
+    <script src="{{ asset('JS/app.js') }}"></script>
+    <script src="{{ asset('JS/login.js') }}"></script>{% endblock %}
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
+{% if imagen %}
 <img src="{{ imagen }}" alt="Profile pic" class="profile-pic">
+{% else %}
+    <button id="login">Iniciar Sesión</button>
+{% endif %}
 <div id="app">
     <aside>
         <div id="hamburguer">
