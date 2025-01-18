@@ -7,7 +7,7 @@
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
 {% if imagen %}
-<img src="{{ imagen }}" alt="Profile pic" class="profile-pic">
+<img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic">
 {% else %}
     <button id="login">Iniciar Sesión</button>
 {% endif %}

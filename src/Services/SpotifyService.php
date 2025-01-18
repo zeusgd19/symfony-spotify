@@ -9,10 +9,10 @@ class SpotifyService
     private HttpClientInterface $httpClient;
     private string $accessToken;
 
-    public function __construct(HttpClientInterface $httpClient, string $accessToken)
+    public function __construct(HttpClientInterface $httpClient, AccessTokenProvider $accessTokenProvider)
     {
         $this->httpClient = $httpClient;
-        $this->accessToken = $accessToken;
+        $this->accessToken = $accessTokenProvider->getAccessToken();
     }
 
     /**

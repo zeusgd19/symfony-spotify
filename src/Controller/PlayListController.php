@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Artist;
 use App\Entity\Playlist;
 use App\Entity\Song;
+use App\Services\SpotifyService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -86,5 +87,12 @@ class PlayListController extends AbstractController
         $response = new JsonResponse($data);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
+    }
+
+    #[Route('/recommendations', name: 'recommendations')]
+    public function recommendations(SpotifyService $spotifyService){
+        $topArtists = $spotifyService->getTopArtists();
+        dd($topArtists);
+        exit();
     }
 }
