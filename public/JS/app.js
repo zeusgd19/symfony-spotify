@@ -16,6 +16,12 @@ $(document).ready(function () {
 
     let playLists = [];
     let songs = [];
+    $('#dropdown1').toggle();
+
+    $('[data-dropdown]').on('click', function(e) {
+        e.preventDefault();
+        $($(this).data('dropdown')).toggle();
+    });
 
     $.ajax({
         type: 'GET',
@@ -87,7 +93,7 @@ $(document).ready(function () {
                         <img src="${song.image}" alt="Imagen cancion">
                         <div class="songInfo">
                             <p>${song.title}</p>
-                            <p>Artists: ${song.artists.join(', ')}</p>
+                            <p id="artists">Artists: ${song.artists.join(', ')}</p>
                         </div>
                     </li>`);
                 $songsUl.append($li);
@@ -139,6 +145,17 @@ $(document).ready(function () {
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');
         const $liElement = $(ev.target).closest('li');
+        const $img = $(`<img id="image-song-card" src="${$liElement.find('img').attr('src')}" alt="Imagen Portada"/>`);
+        const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
+        const $artist = $(`<p id="artists-card-song" class="marquee">${$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)}</p>`)
+        const $div = $('<div></div>')
+        $('#song-card').empty();
+        $('#song-card').append($div)
+        $('#song-card').prepend($img).find('div').append($title).append($artist);
+
+
+
+
         const $audio = $('<audio>', {
             id: 'song',
             src: `music/${$liElement.data('album-id')}/${$liElement.data('title')}.mp3`,
@@ -170,12 +187,28 @@ $(document).ready(function () {
             $audio[0].play();
             isPlaying = true;
             $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+            if(window.innerWidth > 480) {
+                $('#equalizer').audioWave({
+                    audioElement: '#song',
+                    waveColor: '#08ff00',
+                    barWidth: 3,
+                    barSpacing: 7,
+                });
+
+                $('#artists-card-song').marquee({
+                    speed: 50,
+                    allowCss3Support:true,
+                    css3easing:'linear',
+                    delayBeforStart: -1,
+                    easing: 'linear',
+                    direction: 'left',
+                    gap: 100
+                });
+            }
         });
 
         $audio.on('timeupdate', updateTime);
     }
-
-    // Manejar el click en cada canción
 
     // Función para manejar el botón de reproducción
     function getPlayer(ev) {
@@ -184,10 +217,12 @@ $(document).ready(function () {
             isPlaying = false;
             $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
             $audio[0].pause();
+            $('.marquee').marquee('pause');
         } else {
             isPlaying = true;
             $audio[0].play();
             $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+            $('.marquee').marquee('resume');
             $audio.on('timeupdate', updateTime);
         }
     }

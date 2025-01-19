@@ -2,12 +2,14 @@
 {% block head %}
     <link rel="stylesheet" href="{{ asset('CSS/styles.css') }}">
     <link rel="stylesheet" href="{{ asset('CSS/login.css') }}">
-    <script src="{{ asset('JS/app.js') }}"></script>
-    <script src="{{ asset('JS/login.js') }}"></script>{% endblock %}
+    <script src="{{ asset('JS/app.js') }}" type="module"></script>
+    <script src="{{ asset('JS/login.js') }}"></script>
+{% endblock %}
+
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
 {% if imagen %}
-<img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic">
+<img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic" data-dropdown="#dropdown1">
 {% else %}
     <button id="login">Iniciar Sesión</button>
 {% endif %}
@@ -53,12 +55,22 @@
         </div>
     </aside>
     <main>
+        <div id="dropdown1" class="dropdown">
+            <ul>
+                <li><a href="/logout">Cerrar Sesión</a></li>
+            </ul>
+        </div>
         <ul id="songs">
         </ul>
     </main>
 
     <footer>
         <div>
+
+            <div id="song-card">
+                <div>
+                </div>
+            </div>
             <button id="player">
                 <svg viewBox="0 0 24 24" class="h-8 w-8" fill="currentColor">
                     <path id="play-svg" fill="currentColor" d="M8 5.14v14l11-7-11-7z"></path>
@@ -69,6 +81,8 @@
                 <input type="range" id="slider" min="0" max="100" value="0">
                 <span id="tiempoTotal">3:20</span>
             </div>
+
+            <canvas id="equalizer" width="100" height="60"></canvas>
         </div>
     </footer>
    <div id="menuMobile">

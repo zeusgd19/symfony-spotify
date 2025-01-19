@@ -17,6 +17,37 @@ html, body {
     gap: 10px;
 }
 
+.marquee {
+    overflow: hidden;
+}
+
+#dropdown1 {
+    display: flex;
+    grid-area: main;
+    justify-self: end;
+    background-color: #121212;
+    color: white;
+    justify-content: end;
+    align-items: center;
+    z-index: 9999;
+}
+
+#dropdown1 ul {
+    display: flex;
+    justify-self: end;
+    background-color: #000000;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 10px;
+    position: absolute;
+}
+
+#dropdown1 ul a {
+    cursor: pointer;
+    background-color: #121212;
+}
+
 .profile-pic {
     display: flex;
     grid-area: profile;
@@ -186,6 +217,46 @@ footer div {
     width: auto;
     text-align: center;
     color: white;
+}
+
+#song-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    position: absolute;
+    left: 20px;
+    gap: 10px;
+}
+
+#song-card > div {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+#image-song-card {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+}
+
+#title-card-song {
+    margin: 0;
+    padding: 0;
+}
+
+#artists-card-song{
+    margin: 0;
+    padding: 0;
+    color: #9e9e9e;
+}
+
+#equalizer {
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
 }
 
 #menuMobile {
