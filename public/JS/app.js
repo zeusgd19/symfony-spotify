@@ -1,5 +1,5 @@
+import {updateMediaSession} from './mediaSession.js'
 $(document).ready(function () {
-
     const $playlistUl = $('#playlists');
     const $hamburguer = $('#hamburguer');
     const $library = $('#library');
@@ -149,7 +149,7 @@ $(document).ready(function () {
         const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
         const $artist = $(`<p id="artists-card-song" class="marquee">${$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)}</p>`)
         const $div = $('<div></div>')
-	isMarqueed = false;
+        isMarqueed = false;
         $('#song-card').empty();
         $('#song-card').append($div)
         $('#song-card').prepend($img).find('div').append($title).append($artist);
@@ -208,6 +208,8 @@ $(document).ready(function () {
                 }
             }
         });
+
+        updateMediaSession($liElement.find('img').attr('src'),$liElement.data('title'),$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length));
 
         $audio.on('timeupdate', updateTime);
     }
