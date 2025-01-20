@@ -149,12 +149,11 @@ $(document).ready(function () {
         const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
         const $artist = $(`<p id="artists-card-song" class="marquee">${$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)}</p>`)
         const $div = $('<div></div>')
+        let marqueed = false;
+
         $('#song-card').empty();
         $('#song-card').append($div)
         $('#song-card').prepend($img).find('div').append($title).append($artist);
-
-
-
 
         const $audio = $('<audio>', {
             id: 'song',
@@ -195,15 +194,18 @@ $(document).ready(function () {
                     barSpacing: 7,
                 });
 
-                $('#artists-card-song').marquee({
-                    speed: 50,
-                    allowCss3Support:true,
-                    css3easing:'linear',
-                    delayBeforStart: -1,
-                    easing: 'linear',
-                    direction: 'left',
-                    gap: 100
-                });
+                if(!marqueed) {
+                    $('#artists-card-song').marquee({
+                        speed: 50,
+                        allowCss3Support: true,
+                        css3easing: 'linear',
+                        delayBeforStart: -1,
+                        easing: 'linear',
+                        direction: 'left',
+                        gap: 100
+                    });
+                }
+                marqueed = true;
             }
         });
 
