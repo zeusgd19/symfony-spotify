@@ -89,7 +89,7 @@ $(document).ready(function () {
     function renderSongs() {
         $songsUl.empty();
         songs.forEach(song => {
-                const $li = $(`<li data-album-id="${song.albumId}" data-song-id="${song.id}" data-title="${song.title}">
+                const $li = $(`<li data-album-id="${song.albumId}" data-song-id="${song.id}" data-title="${song.title}" data-album="${song.album}">
                         <img src="${song.image}" alt="Imagen cancion">
                         <div class="songInfo">
                             <p>${song.title}</p>
@@ -145,9 +145,10 @@ $(document).ready(function () {
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');
         const $liElement = $(ev.target).closest('li');
+        const artists = $liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)
         const $img = $(`<img id="image-song-card" src="${$liElement.find('img').attr('src')}" alt="Imagen Portada"/>`);
         const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
-        const $artist = $(`<p id="artists-card-song" class="marquee">${$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)}</p>`)
+        const $artist = $(`<p id="artists-card-song" class="marquee">${artists}</p>`)
         const $div = $('<div></div>')
         isMarqueed = false;
         $('#song-card').empty();
@@ -209,7 +210,7 @@ $(document).ready(function () {
             }
         });
 
-        updateMediaSession($liElement.find('img').attr('src'),$liElement.data('title'),$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length));
+        updateMediaSession($liElement.find('img').attr('src'),$liElement.data('title'),artists,$liElement.data('album'));
 
         $audio.on('timeupdate', updateTime);
     }

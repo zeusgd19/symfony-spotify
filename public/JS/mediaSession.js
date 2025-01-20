@@ -1,9 +1,9 @@
-export function updateMediaSession(image,title,artists) {
+export function updateMediaSession(image,title,artists,album) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: title,
                 artist: artists,
-                album: 'My Music App',
+                album: album,
                 artwork: [
                     {src: image, sizes: '96x96', type: 'image/png'},
                     {src: image, sizes: '128x128', type: 'image/png'},
