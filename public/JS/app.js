@@ -11,7 +11,7 @@ $(document).ready(function () {
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
     let $tiempoTotal = $('#tiempoTotal');
-
+    let isMarqueed = false;
     let isPlaying = false;
 
     let playLists = [];
@@ -149,8 +149,7 @@ $(document).ready(function () {
         const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
         const $artist = $(`<p id="artists-card-song" class="marquee">${$liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)}</p>`)
         const $div = $('<div></div>')
-        let marqueed = false;
-
+	isMarqueed = false;
         $('#song-card').empty();
         $('#song-card').append($div)
         $('#song-card').prepend($img).find('div').append($title).append($artist);
@@ -194,7 +193,7 @@ $(document).ready(function () {
                     barSpacing: 7,
                 });
 
-                if(!marqueed) {
+                if(!isMarqueed) {
                     $('#artists-card-song').marquee({
                         speed: 50,
                         allowCss3Support: true,
@@ -204,8 +203,9 @@ $(document).ready(function () {
                         direction: 'left',
                         gap: 100
                     });
+
+		   isMarqueed = true;
                 }
-                marqueed = true;
             }
         });
 
