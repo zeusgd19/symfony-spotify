@@ -8,11 +8,13 @@
 
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
-{% if imagen %}
+<div id="containerLogin">
+{% if app.user %}
 <img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic" data-dropdown="#dropdown1">
 {% else %}
     <button id="login">Iniciar Sesión</button>
 {% endif %}
+</div>
 <div id="app">
     <aside>
         <div id="hamburguer">
