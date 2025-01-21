@@ -182,10 +182,15 @@ $(document).ready(function () {
             $tiempoTotal.text(`${minutos}:${segundos}`);
         });
 
-        $audio.on('canplay', function () {
+        $audio.on('canplay', function (ev) {
             $audio[0].play();
             isPlaying = true;
             $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+
+            if(ev.target.paused){
+                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+            }
+
             if(window.innerWidth > 480) {
                 $('#equalizer').audioWave({
                     audioElement: '#song',
