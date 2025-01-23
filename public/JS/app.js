@@ -27,6 +27,33 @@ $(document).ready(function () {
 
     });
 
+    if(window.location.href === '/'){
+        window.history.pushState({}, '', '/');
+    }
+
+    if(sessionStorage.getItem('query')){
+        let query = sessionStorage.getItem('query');
+        window.history.pushState({}, '', '/search/' + query);
+        if (query.length > 2) {
+            $.ajax({
+                url: '/query',
+                type: 'POST',
+                data: { q: query },
+                success: function(response) {
+                    const { artists, tracks } = response;
+                    console.log(artists.items)
+                    sessionStorage.clear()
+                    setArtistsSearched(artists.items);
+                },
+                error: function(xhr) {
+                    console.error('Error en la búsqueda:', xhr.responseText);
+                }
+            });
+        }
+
+    }
+
+
     function debounce(func, delay) {
         let timer;
         return function(...args) {
@@ -37,14 +64,24 @@ $(document).ready(function () {
 
     $('#search').on('input', debounce(function() {
         let query = $(this).val().trim();
-
+        window.history.pushState({}, '', '/search/' + query);
         if (query.length > 2) {
             $.ajax({
-                url: '/search',
+                url: '/query',
                 type: 'POST',
                 data: { q: query },
                 success: function(response) {
-                    console.log('Resultados:', response);
+                    const { artists, tracks } = response;
+                    console.log(artists.items)
+                    $.ajax({
+                        url: '/search',
+                        type: 'GET',
+                        success: function (data) {
+                            $('main').find('#artists').remove();
+                            $('main').append(data);
+                            setArtistsSearched(artists.items);
+                        }
+                    })
                 },
                 error: function(xhr) {
                     console.error('Error en la búsqueda:', xhr.responseText);
@@ -53,6 +90,21 @@ $(document).ready(function () {
         }
     }, 300)); // Espera 300ms antes de hacer la petición
 
+    function setArtistsSearched(artists){
+        $('#artists-list').empty();
+        artists.forEach(artist => {
+            const image = artist.images.length !== 0 ? artist.images[0].url : "img/defectImg.svg";
+            const $li = $(`<li class="artist">
+                    <div id="artist-img-back">
+                        <img src="${image}" alt="${artist.name}" class="artist-img">
+                    </div>
+                    <p>${artist.name}</p>
+                    <p>Artista</p>`
+            );
+
+            $('#artists-list').append($li);
+        })
+    }
 
     $.ajax({
         type: 'GET',

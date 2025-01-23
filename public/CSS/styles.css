@@ -100,6 +100,7 @@ html, body {
     width: 30px;
     height: 30px;
     margin-right: 20px;
+    margin-top: 10px;
 }
 
 aside {
@@ -219,6 +220,55 @@ main {
 
 #songs li:hover {
     background-color: #383737;
+}
+
+#artists {
+    display: grid;
+    max-width: 1920px;
+    margin: 0 200px;
+}
+
+#artists-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.title-searches {
+    color: white;
+    font-size: 30px;
+    margin-left: 15px;
+}
+
+.artist-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    box-shadow: 1px 1px 20px #000000;
+}
+
+#artist-img-back {
+    background-color: #121212;
+    width: 160px;
+    height: 160px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.artist p {
+    padding: 0;
+    margin: 5px;
+}
+
+.artist > p:nth-child(2n + 1) {
+    color: #959595;
+}
+
+.artist > p:first-of-type {
+    font-size: 20px;
+    color: white;
+    font-weight: bolder;
 }
 
 audio {

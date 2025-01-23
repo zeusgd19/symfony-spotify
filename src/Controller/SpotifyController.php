@@ -91,6 +91,7 @@ class SpotifyController extends AbstractController
             $session->set('imagen', $profileImageUrl);
             $session->set('correoElectronico', $email);
             $session->set('token', $accessToken);
+            $session->set('refresh_token', $refreshToken);
 
             $artist = $doctrine->getRepository(Artist::class)->findOneBy(['email' => $email]);
 

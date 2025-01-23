@@ -27,8 +27,15 @@ class PageController extends AbstractController
         return $this->render('login/index.html.twig');
     }
 
-    #[Route('/search', name: 'search')]
-    public function searchForSongs(Request $request,SpotifyService $spotifyService): Response {
+    #[Route('/search/{nombre}', name: 'searchWeb', defaults: ['nombre' => ""])]
+    public function search(SessionInterface $session): Response
+    {
+        $imagen = $session->get('imagen');
+        return $this->render('partials/_search_results.html.twig');
+    }
+
+    #[Route('/query', name: 'search')]
+    public function query(Request $request,SpotifyService $spotifyService): Response {
         $query = $request->get('q');
 
         if (!$query) {
