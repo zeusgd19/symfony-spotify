@@ -23,9 +23,13 @@ services:
     App\Services\AccessTokenProvider:
         arguments:
             $session: '@session.factory'
+    App\Services\RefreshTokenProvider:
+        arguments:
+            $session: '@session.factory'
     App\Services\SpotifyService:
         arguments:
             $accessTokenProvider: '@App\Services\AccessTokenProvider'
+            $refreshTokenProvider: '@App\Services\RefreshTokenProvider'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

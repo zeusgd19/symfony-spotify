@@ -19,4 +19,10 @@ class AccessTokenProvider
     {
         return $this->session->get('token', null);
     }
+
+    public function setAccessToken(string $token): void {
+        $this->session->set('token', $token);
+    }
+
+
 }

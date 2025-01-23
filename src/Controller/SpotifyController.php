@@ -19,7 +19,7 @@ class SpotifyController extends AbstractController
 {
 
     private string $redirectUri = 'http://spotifyclone.shop/callback';
-    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read';
+    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
     {
@@ -91,6 +91,7 @@ class SpotifyController extends AbstractController
             $session->set('imagen', $profileImageUrl);
             $session->set('correoElectronico', $email);
             $session->set('token', $accessToken);
+            $session->set('refresh_token', $refreshToken);
 
             $artist = $doctrine->getRepository(Artist::class)->findOneBy(['email' => $email]);
 
