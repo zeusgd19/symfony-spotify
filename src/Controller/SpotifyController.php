@@ -19,7 +19,7 @@ class SpotifyController extends AbstractController
 {
 
     private string $redirectUri = 'http://localhost:8000/callback';
-    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read';
+    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
     {

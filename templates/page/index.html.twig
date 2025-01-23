@@ -9,7 +9,12 @@
 {% block title %}Spotify Clone{% endblock %}
 {% block body %}
 <div id="containerLogin">
-{% if app.user %}
+    <img src="{{ asset('img/spotifyWhite.svg')}}" id="logo">
+    <div id="inputContainer">
+        <img src="{{ asset('img/search.svg') }}" id="search-icon">
+        <input type="text" name="search" id="search" placeholder="¿Que quieres reproducir?">
+    </div>
+    {% if app.user %}
 <img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic" data-dropdown="#dropdown1">
 {% else %}
     <button id="login">Iniciar Sesión</button>
@@ -57,11 +62,13 @@
         </div>
     </aside>
     <main>
+        {% if app.user %}
         <div id="dropdown1" class="dropdown">
             <ul>
                 <li><a href="/logout">Cerrar Sesión</a></li>
             </ul>
         </div>
+        {% endif %}
         <ul id="songs">
         </ul>
     </main>

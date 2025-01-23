@@ -78,7 +78,7 @@ class SpotifyService
     /**
      * Genera recomendaciones basadas en artistas, canciones y géneros.
      */
-    public function getRecommendations(array $seedArtists, array $seedTracks, array $seedGenres, int $limit = 10): array
+    public function getRecommendations(array $seedArtists, array $seedTracks, int $limit = 5): array
     {
         $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/recommendations', [
             'headers' => [
@@ -87,13 +87,28 @@ class SpotifyService
             'query' => [
                 'seed_artists' => implode(',', array_slice($seedArtists, 0, 5)), // Máximo 5
                 'seed_tracks' => implode(',', array_slice($seedTracks, 0, 5)), // Máximo 5
-                'seed_genres' => implode(',', array_slice($seedGenres, 0, 5)), // Máximo 5
+                //'seed_genres' => implode(',', array_slice($seedGenres, 0, 5)), // Máximo 5
                 'limit' => $limit,
             ],
         ]);
 
         $content = json_decode($response->getContent(), true);
         return $content['tracks'] ?? [];
+    }
+
+    public function search(string $query, array $types = ['track'], int $limit = 10): array {
+        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/search', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->accessToken,
+            ],
+            'query' => [
+                'q' => $query,
+                'type' => implode(',', $types),
+                'limit' => $limit,
+            ],
+        ]);
+
+        return json_decode($response->getContent(), true);
     }
 }
 

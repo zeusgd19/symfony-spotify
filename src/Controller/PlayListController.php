@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api', name: 'api_')]
 class PlayListController extends AbstractController
@@ -90,9 +91,29 @@ class PlayListController extends AbstractController
     }
 
     #[Route('/recommendations', name: 'recommendations')]
-    public function recommendations(SpotifyService $spotifyService){
+    public function recommendations(SpotifyService $spotifyService,SessionInterface $session){
         $topArtists = $spotifyService->getTopArtists();
+        $topTracks = $spotifyService->getTopTracks();
+        $seedArtists = [];
+        $seedTracks = [];
+        $seedGenres = [];
+        foreach ($topArtists as $topArtist){
+            $seedArtists[] = $topArtist['id'];
+            if(!in_array($topArtist['genre'][0] ?? null,$seedGenres)){
+                $seedGenres[] = $topArtist['genres'][0] ?? null;
+            }
+        }
+        //BQBpgqzd8wxq3jrVsVUVpFb3B931uC30wEETqUD6nT9wj7Hgn_PKGkwC5yZHkxSJ_cKSBzqpUyb_Ld6jhiPHsx8gVuoBBymtRQsYT54jBdGIrYhaFueMADNXMQ1-6Akf1FD61iodYci-Dl0zz0pXs1vz8mpu2xAqB8yeoK7__r6EwWF85EYh_oCzhLyL-LeD6Ua8_VcdrD8miwft2Df0tFtB_cPK8U_tL4vNCPo5sA
+
+        foreach ($topTracks as $topTrack){
+            $seedTracks[] = $topTrack['id'];
+        }
+
+        //curl --request GET --url 'https://api.spotify.com/v1/recommendations?seed_artists=4NHQUGzhtTLFvgF5SZesLK&seed_genres=classical%2Ccountry&seed_tracks=0c6xIDDpzE81m2q797ordA' --header 'Authorization: Bearer         BQBpgqzd8wxq3jrVsVUVpFb3B931uC30wEETqUD6nT9wj7Hgn_PKGkwC5yZHkxSJ_cKSBzqpUyb_Ld6jhiPHsx8gVuoBBymtRQsYT54jBdGIrYhaFueMADNXMQ1-6Akf1FD61iodYci-Dl0zz0pXs1vz8mpu2xAqB8yeoK7__r6EwWF85EYh_oCzhLyL-LeD6Ua8_VcdrD8miwft2Df0tFtB_cPK8U_tL4vNCPo5sA'
+        //$recommendations = $spotifyService->getRecommendations($seedArtists, $seedTracks);
+
         dd($topArtists);
         exit();
+
     }
 }

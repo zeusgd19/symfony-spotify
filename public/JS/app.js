@@ -21,7 +21,38 @@ $(document).ready(function () {
     $('[data-dropdown]').on('click', function(e) {
         e.preventDefault();
         $($(this).data('dropdown')).toggle();
+        if($($(this).data('dropdown')).css('opacity') == 0){
+            $($(this).data('dropdown')).css({opacity: 100})
+        }
+
     });
+
+    function debounce(func, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    $('#search').on('input', debounce(function() {
+        let query = $(this).val().trim();
+
+        if (query.length > 2) {
+            $.ajax({
+                url: '/search',
+                type: 'POST',
+                data: { q: query },
+                success: function(response) {
+                    console.log('Resultados:', response);
+                },
+                error: function(xhr) {
+                    console.error('Error en la búsqueda:', xhr.responseText);
+                }
+            });
+        }
+    }, 300)); // Espera 300ms antes de hacer la petición
+
 
     $.ajax({
         type: 'GET',
@@ -182,14 +213,10 @@ $(document).ready(function () {
             $tiempoTotal.text(`${minutos}:${segundos}`);
         });
 
-        $audio.on('canplay', function (ev) {
+        $audio.on('canplay', function () {
             $audio[0].play();
             isPlaying = true;
             $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
-
-            if(ev.target.paused){
-                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
-            }
 
             if(window.innerWidth > 480) {
                 $('#equalizer').audioWave({
@@ -221,7 +248,7 @@ $(document).ready(function () {
     }
 
     // Función para manejar el botón de reproducción
-    function getPlayer(ev) {
+    function getPlayer() {
         const $audio = $('#song');
         if (isPlaying) {
             isPlaying = false;
@@ -244,6 +271,12 @@ $(document).ready(function () {
         const tiempoActual = ev.target.currentTime;
         const minutos = Math.floor(tiempoActual / 60);
         const segundos = Math.floor(tiempoActual % 60).toString().padStart(2, '0');
+
+        if(ev.target.paused){
+            $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+        } else {
+            $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+        }
 
         $('#tiempoRecorrido').text(`${minutos}:${segundos}`);
         $slider.attr('max', ev.target.duration);
