@@ -17,6 +17,6 @@ class RefreshTokenProvider
 
     public function getRefreshToken(): ?string
     {
-        return $this->session->get('refresh_token', null);
+        return $this->session->get('refresh_token', "nothing");
     }
 }

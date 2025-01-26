@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SpotifyService
@@ -21,34 +20,55 @@ class SpotifyService
         $this->refreshToken = $refreshTokenProvider->getRefreshToken();
         $this->clientId = $params->get('clientId');
         $this->clientSecret = $params->get('clientSecret');
-        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
-            ],
-        ]);
 
-        if($response->getStatusCode() === 401) {
-            $newResponse = $this->httpClient->request('POST', 'https://accounts.spotify.com/api/token', [
+        if($this->accessToken !== "nothing") {
+            $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me', [
                 'headers' => [
-                    'Authorization' => 'Basic ' . base64_encode($this->clientId . ':' . $this->clientSecret),
-                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Authorization' => 'Bearer ' . $this->accessToken,
                 ],
-                'body' => [
-                    'grant_type' => 'refresh_token',
-                    'refresh_token' => $this->refreshToken,
-                ]
             ]);
 
-            $content = json_decode($newResponse->getContent(), true);
+            if ($response->getStatusCode() === 401) {
+                $newResponse = $this->httpClient->request('POST', 'https://accounts.spotify.com/api/token', [
+                    'headers' => [
+                        'Authorization' => 'Basic ' . base64_encode($this->clientId . ':' . $this->clientSecret),
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                    ],
+                    'body' => [
+                        'grant_type' => 'refresh_token',
+                        'refresh_token' => $this->refreshToken,
+                    ]
+                ]);
 
-            if (isset($content['access_token'])) {
-                $accessTokenProvider->setAccessToken($content['access_token']);
-                $this->accessToken = $accessTokenProvider->getAccessToken();
-            } else {
-                throw new \Exception('No se pudo obtener el nuevo access token de Spotify.');
+                $content = json_decode($newResponse->getContent(), true);
+
+                if (isset($content['access_token'])) {
+                    $accessTokenProvider->setAccessToken($content['access_token']);
+                    $this->accessToken = $accessTokenProvider->getAccessToken();
+                } else {
+                    throw new \Exception('No se pudo obtener el nuevo access token de Spotify.');
+                }
             }
         }
     }
+
+    public function getTokenWithoutLogin() {
+        $response = $this->httpClient->request('POST', 'https://accounts.spotify.com/api/token', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($this->clientId . ':' . $this->clientSecret),
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'body' => [
+                'grant_type' => 'client_credentials'
+            ]
+        ]);
+
+        $tokenData = json_decode($response->getContent(), true);
+
+        return $tokenData['access_token'];
+    }
+
+
 
     /**
      * Obtén los artistas más escuchados del usuario.
@@ -132,9 +152,12 @@ class SpotifyService
     }
 
     public function search(string $query, array $types = ['track'], int $limit = 10): array {
-        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/search', [
+
+        $newToken = $this->getTokenWithoutLogin();
+
+        $searched = $this->httpClient->request('GET', 'https://api.spotify.com/v1/search', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer ' . $newToken,
             ],
             'query' => [
                 'q' => $query,
@@ -143,7 +166,71 @@ class SpotifyService
             ],
         ]);
 
-        return json_decode($response->getContent(), true);
+        return json_decode($searched->getContent(), true);
+    }
+
+    public function getPopularArtists(): array
+    {
+
+        $newToken = $this->getTokenWithoutLogin();
+        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/playlists/3mn4kXt07PEGZFR46h3HhN', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $newToken,
+            ]
+        ]);
+
+
+        $playlists = json_decode($response->getContent(), true);
+
+
+        $artistsData = [];
+        $limit = 20;
+        $countdown = 0;
+        $lastArtistId = 0;
+        foreach ($playlists['tracks']['items'] as $item) {
+            $track = $item['track'];
+
+            if (isset($track['artists']) && is_array($track['artists'])) {
+                foreach ($track['artists'] as $artist) {
+                    if($countdown >= $limit) {
+                        break;
+                    }
+                    $artistId = $artist['id'];
+                    if($lastArtistId != $artistId) {
+                        $artistResponse = $this->httpClient->request('GET', "https://api.spotify.com/v1/artists/$artistId", [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . $newToken,
+                            ]
+                        ]);
+
+
+                        $artistData = json_decode($artistResponse->getContent(), true);
+
+                        $artistsData[$artistId] = $artistData;
+                    }
+                    $lastArtistId = $artistId;
+                    $countdown++;
+                }
+            }
+        }
+
+        return $artistsData;
+    }
+
+
+    function getNewAlbums()
+    {
+        $newToken = $this->getTokenWithoutLogin();
+
+        $newAlbums = $this->httpClient->request('GET', "https://api.spotify.com/v1/browse/new-releases", [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $newToken,
+            ]
+        ]);
+
+        $albums = json_decode($newAlbums->getContent(), true);
+
+        return $albums['albums']['items'];
     }
 }
 

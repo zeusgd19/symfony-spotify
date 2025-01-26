@@ -19,12 +19,36 @@ html, body {
     position: relative;
 }
 
+#back-home {
+    width: 45px;
+    height: 45px;
+    position: absolute;
+    left: -50px;
+    top: 10px;
+    border-radius: 100%;
+    background-color: #383737;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.1s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#back-home:hover {
+    transform: scale(1.06);
+}
+
+#home-icon {
+    width: 25px;
+    height: 25px;
+}
+
 #search-icon {
     width: 30px;
     height: 30px;
     position: absolute;
     left: 5px;
-    top: 7px;
+    top: 13px;
 }
 #search {
     display: flex;
@@ -110,7 +134,6 @@ aside {
     overflow-x: hidden;
     gap: 10px;
     transition: width 0.3s;
-    overflow-y: auto;
 }
 
 aside::-webkit-scrollbar {
@@ -204,14 +227,13 @@ main {
     background-color: #121212;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Permite scroll vertical */
+    overflow-x: hidden;
     padding: 10px;
 }
 
 /* Limitar el alto de las canciones para evitar que sobrepasen el contenedor */
 #songs {
     max-height: calc(100vh - 200px); /* Limita la altura y deja espacio para el footer */
-    overflow-y: auto; /* Scroll solo si hay muchas canciones */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -222,15 +244,21 @@ main {
     background-color: #383737;
 }
 
-#artists {
+#artists-searched {
     display: grid;
-    max-width: 1920px;
-    margin: 0 200px;
+    max-width: 2560px;
+    margin: 0 20px;
 }
 
-#artists-list {
+#artists-popular, #albums-popular {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+
+
+#artists-list, #artists-list-populars, #albums-list-populars {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
 .title-searches {
@@ -239,36 +267,80 @@ main {
     margin-left: 15px;
 }
 
-.artist-img {
-    width: 150px;
-    height: 150px;
-    border-radius: 100%;
-    box-shadow: 1px 1px 20px #000000;
+.artist {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 200px;
 }
 
-#artist-img-back {
+.album {
+    padding: 10px 20px 10px 20px;
+    height: 210px;
+}
+
+.artist-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 100%;
+    box-shadow: 1px 1px 20px #000000;
+    justify-content: center;
+}
+
+.album-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 5px;
+    box-shadow: 1px 1px 20px #000000;
+    justify-content: center;
+}
+
+.artist-img-back {
     background-color: #121212;
-    width: 160px;
-    height: 160px;
+    width: 150px;
+    height: 150px;
     border-radius: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    justify-self: center;
 }
 
-.artist p {
+.album-img-back {
+    background-color: #121212;
+    width: 150px;
+    height: 150px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+}
+
+.artist p, .album p {
     padding: 0;
     margin: 5px;
 }
 
-.artist > p:nth-child(2n + 1) {
+.artist > p:nth-child(2n + 1), .album > p:nth-child(2n + 1) {
     color: #959595;
 }
 
 .artist > p:first-of-type {
-    font-size: 20px;
+    font-size: 16px;
     color: white;
     font-weight: bolder;
+}
+
+.album > p:first-of-type {
+    font-size: 10px;
+    color: white;
+    font-weight: bolder;
+}
+
+.artist:hover, .album:hover {
+    background-color: rgba(170,170,170,5%);
+    border-radius: 15px;
+    cursor: pointer;
 }
 
 audio {

@@ -17,7 +17,8 @@ class AccessTokenProvider
 
     public function getAccessToken(): ?string
     {
-        return $this->session->get('token', null);
+
+        return $this->session->get('token', "nothing");
     }
 
     public function setAccessToken(string $token): void {
