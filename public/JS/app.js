@@ -1,5 +1,6 @@
 import {updateMediaSession} from './mediaSession.js'
 $(document).ready(function () {
+
     const $playlistUl = $('#playlists');
     const $hamburguer = $('#hamburguer');
     const $library = $('#library');
@@ -10,13 +11,48 @@ $(document).ready(function () {
     const $player = $('#player');
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
+
     let $tiempoTotal = $('#tiempoTotal');
     let isMarqueed = false;
     let isPlaying = false;
 
     let playLists = [];
     let songs = [];
-    $('#dropdown1').toggle();
+
+
+    $('#back-home').on('click',function(){
+        window.location.href = "/";
+    })
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.getAttribute("data-src");
+                img.removeAttribute("data-src");
+                observer.unobserve(img);
+            }
+        });
+    }, {
+        rootMargin: "0px 0px 10px 10px"
+    });
+
+    const observeLazyImages = () => {
+        document.querySelectorAll("img[data-src]").forEach(img => observer.observe(img));
+    };
+
+    const mutationObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.addedNodes.length) {
+                observeLazyImages();
+            }
+        });
+    });
+
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    observeLazyImages();
+
 
     $('[data-dropdown]').on('click', function(e) {
         e.preventDefault();
@@ -53,6 +89,48 @@ $(document).ready(function () {
 
     }
 
+    function adjustItems() {
+        let albums = document.querySelectorAll('.album');
+        let artists = document.querySelectorAll('.artist');
+        console.log(window.innerWidth)
+        Array.from(artists).some((item, index) => {
+            let hidden = false;
+            const rect = item.getBoundingClientRect();
+            if(rect.right >= window.innerWidth - 40){
+                for (let i = index + 1; i < artists.length; i++) {
+                    artists[i].style.display = 'none';
+                    hidden = true;
+                }
+            } else {
+                item.style.display = 'block';
+            }
+
+            if(hidden){
+                return true;
+            }
+        });
+        Array.from(albums).some((item, index) => {
+            let hidden = false;
+            const rect = item.getBoundingClientRect();
+            if(rect.right >= window.innerWidth - 40){
+                for (let i = index + 1; i < albums.length; i++) {
+                    albums[i].style.display = 'none';
+                    hidden = true;
+                }
+            } else {
+                item.style.display = 'block';
+            }
+
+            if(hidden){
+                return true;
+            }
+        });
+    }
+
+    adjustItems();
+
+    window.onresize = adjustItems;
+
 
     function debounce(func, delay) {
         let timer;
@@ -77,7 +155,8 @@ $(document).ready(function () {
                         url: '/search',
                         type: 'GET',
                         success: function (data) {
-                            $('main').find('#artists').remove();
+                            $('main').find('#artists-popular').remove();
+                            $('main').find('#artists-searched').remove();
                             $('main').append(data);
                             setArtistsSearched(artists.items);
                         }
@@ -88,15 +167,16 @@ $(document).ready(function () {
                 }
             });
         }
-    }, 300)); // Espera 300ms antes de hacer la petición
+    }, 500)); // Espera 300ms antes de hacer la petición
 
     function setArtistsSearched(artists){
         $('#artists-list').empty();
+        $('#artists-list-populars').empty();
         artists.forEach(artist => {
-            const image = artist.images.length !== 0 ? artist.images[0].url : "img/defectImg.svg";
-            const $li = $(`<li class="artist">
-                    <div id="artist-img-back">
-                        <img src="${image}" alt="${artist.name}" class="artist-img">
+            const image = artist.images.length !== 0 ? artist.images[0].url : "/img/defectImg.svg";
+            const $li = $(`<li class="artist" data-id="${artist.id}">
+                    <div class="artist-img-back">
+                        <img data-src="${image}" alt="${artist.name}" class="artist-img lazy-load">
                     </div>
                     <p>${artist.name}</p>
                     <p>Artista</p>`
@@ -161,9 +241,9 @@ $(document).ready(function () {
             $aside.css('width', '350px');
             $library.css('margin-left', '50px');
             $menu.css('margin-left', '50px');
-
             renderPlayLists();
         }
+        adjustItems();
     }
 
     // Manejar el clic en el botón hamburguesa
