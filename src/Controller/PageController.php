@@ -13,9 +13,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class PageController extends AbstractController
 {
     #[Route('/', name: 'app_page')]
-    public function index(SessionInterface $session, SpotifyService $spotifyService, Request $request): Response
+    public function index(SessionInterface $session, SpotifyService $spotifyService): Response
     {
-        $query = "popular-artists";
         $albums = $spotifyService->getNewAlbums();
         $results = $spotifyService->getPopularArtists();
         $imagen = $session->get('imagen');

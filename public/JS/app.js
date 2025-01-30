@@ -11,6 +11,7 @@ $(document).ready(function () {
     const $player = $('#player');
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
+    const main = $('main').html();
 
     let $tiempoTotal = $('#tiempoTotal');
     let isMarqueed = false;
@@ -19,40 +20,14 @@ $(document).ready(function () {
     let playLists = [];
     let songs = [];
 
+    adjustItems();
+    $(window).on("resize", adjustItems);
 
     $('#back-home').on('click',function(){
-        window.location.href = "/";
+        $songsUl.empty();
+        $('main').append(main);
+        window.history.pushState({}, '', '/');
     })
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.getAttribute("data-src");
-                img.removeAttribute("data-src");
-                observer.unobserve(img);
-            }
-        });
-    }, {
-        rootMargin: "0px 0px 10px 10px"
-    });
-
-    const observeLazyImages = () => {
-        document.querySelectorAll("img[data-src]").forEach(img => observer.observe(img));
-    };
-
-    const mutationObserver = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            if (mutation.addedNodes.length) {
-                observeLazyImages();
-            }
-        });
-    });
-
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
-
-    observeLazyImages();
-
 
     $('[data-dropdown]').on('click', function(e) {
         e.preventDefault();
@@ -63,111 +38,48 @@ $(document).ready(function () {
 
     });
 
-    if(window.location.href === '/'){
-        window.history.pushState({}, '', '/');
-    }
-
-    if(sessionStorage.getItem('query')){
-        let query = sessionStorage.getItem('query');
-        window.history.pushState({}, '', '/search/' + query);
-        if (query.length > 2) {
-            $.ajax({
-                url: '/query',
-                type: 'POST',
-                data: { q: query },
-                success: function(response) {
-                    const { artists, tracks } = response;
-                    console.log(artists.items)
-                    sessionStorage.clear()
-                    setArtistsSearched(artists.items);
-                },
-                error: function(xhr) {
-                    console.error('Error en la búsqueda:', xhr.responseText);
-                }
-            });
-        }
-
-    }
-
     function adjustItems() {
-        let albums = document.querySelectorAll('.album');
-        let artists = document.querySelectorAll('.artist');
-        console.log(window.innerWidth)
-        Array.from(artists).some((item, index) => {
+        let $albums = $(".album");
+        let $artists = $(".artist");
+
+        $artists.each(function(index) {
             let hidden = false;
-            const rect = item.getBoundingClientRect();
-            if(rect.right >= window.innerWidth - 40){
-                for (let i = index + 1; i < artists.length; i++) {
-                    artists[i].style.display = 'none';
-                    hidden = true;
-                }
+            let rect = this.getBoundingClientRect();
+
+            if (rect.right >= window.innerWidth - 40) {
+                $artists.slice(index + 1).hide();
+                hidden = true;
             } else {
-                item.style.display = 'block';
+                $(this).show();
             }
 
-            if(hidden){
-                return true;
-            }
+            if (hidden) return false;
         });
-        Array.from(albums).some((item, index) => {
+
+        $albums.each(function(index) {
             let hidden = false;
-            const rect = item.getBoundingClientRect();
-            if(rect.right >= window.innerWidth - 40){
-                for (let i = index + 1; i < albums.length; i++) {
-                    albums[i].style.display = 'none';
-                    hidden = true;
-                }
+            let rect = this.getBoundingClientRect();
+
+            if (rect.right >= window.innerWidth - 40) {
+                $albums.slice(index + 1).hide();
+                hidden = true;
             } else {
-                item.style.display = 'block';
+                $(this).show();
             }
 
-            if(hidden){
-                return true;
-            }
+            if (hidden) return false;
         });
     }
-
-    adjustItems();
-
-    window.onresize = adjustItems;
 
 
     function debounce(func, delay) {
         let timer;
-        return function(...args) {
+        return function () {
+            let context = this, args = arguments;
             clearTimeout(timer);
-            timer = setTimeout(() => func.apply(this, args), delay);
+            timer = setTimeout(() => func.apply(context, args), delay);
         };
     }
-
-    $('#search').on('input', debounce(function() {
-        let query = $(this).val().trim();
-        window.history.pushState({}, '', '/search/' + query);
-        if (query.length > 2) {
-            $.ajax({
-                url: '/query',
-                type: 'POST',
-                data: { q: query },
-                success: function(response) {
-                    const { artists, tracks } = response;
-                    console.log(artists.items)
-                    $.ajax({
-                        url: '/search',
-                        type: 'GET',
-                        success: function (data) {
-                            $('main').find('#artists-popular').remove();
-                            $('main').find('#artists-searched').remove();
-                            $('main').append(data);
-                            setArtistsSearched(artists.items);
-                        }
-                    })
-                },
-                error: function(xhr) {
-                    console.error('Error en la búsqueda:', xhr.responseText);
-                }
-            });
-        }
-    }, 500)); // Espera 300ms antes de hacer la petición
 
     function setArtistsSearched(artists){
         $('#artists-list').empty();
@@ -186,6 +98,66 @@ $(document).ready(function () {
         })
     }
 
+    $('#search').on('input', debounce(function() {
+        let query = $(this).val().trim();
+        window.history.pushState({}, '', '/search/' + query);
+        if (query.length > 2) {
+            $.ajax({
+                url: '/query',
+                type: 'POST',
+                data: { q: query },
+                success: function(response) {
+                    const { artists, tracks } = response;
+                    console.log(artists.items)
+                    $.ajax({
+                        url: '/search',
+                        type: 'GET',
+                        success: function (data) {
+                            $('main').empty();
+                            $('main').append(data);
+                            setArtistsSearched(artists.items);
+                        }
+                    })
+                },
+                error: function(xhr) {
+                    console.error('Error en la búsqueda:', xhr.responseText);
+                }
+            });
+        }
+    }, 500));
+
+    function renderPlayLists() {
+        adjustItems();
+        if (!$menu.hasClass('hidden')) {
+            $playlistUl.empty();
+            playLists.forEach(playList => {
+                const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
+                        <img src="${playList.cover}" alt="Cover playlist">
+                        <div class="playlistInfo">
+                            <p>${playList.title}</p>
+                            <p>Artists: ${playList.artists.join(', ')}</p>
+                        </div>
+                    </li>`);
+                $playlistUl.append($li);
+            });
+        }
+        /*else if(window.innerWidth <= 480) {
+            $songsUl.empty();
+            playLists.forEach(playList => {
+                const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
+                        <img src="${playList.cover}" alt="Cover playlist">
+                        <div class="playlistInfo">
+                            <p>${playList.title}</p>
+                            <p>Artists: ${playList.artists.join(', ')}</p>
+                        </div>
+                    </li>`);
+                $songsUl.append($li);
+            });
+        }
+
+         */
+    }
+
     $.ajax({
         type: 'GET',
         url: '/api/playlists',
@@ -199,33 +171,22 @@ $(document).ready(function () {
         }
     })
 
-    function renderPlayLists() {
-        if (!$menu.hasClass('hidden')) {
-            $playlistUl.empty();
-            playLists.forEach(playList => {
-                const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
+    $('.library-mobile').on('click',function (ev){
+        ev.preventDefault();
+        $('#artists-popular').empty();
+        $('#albums-popular').empty();
+        $songsUl.empty();
+        playLists.forEach(playList => {
+            const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
                         <img src="${playList.cover}" alt="Cover playlist">
                         <div class="playlistInfo">
                             <p>${playList.title}</p>
                             <p>Artists: ${playList.artists.join(', ')}</p>
                         </div>
                     </li>`);
-                $playlistUl.append($li);
-            });
-        } else if(window.innerWidth <= 480) {
-            $songsUl.empty();
-            playLists.forEach(playList => {
-                const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
-                        <img src="${playList.cover}" alt="Cover playlist">
-                        <div class="playlistInfo">
-                            <p>${playList.title}</p>
-                            <p>Artists: ${playList.artists.join(', ')}</p>
-                        </div>
-                    </li>`);
-                $songsUl.append($li);
-            });
-        }
-    }
+            $songsUl.append($li);
+        });
+    })
 
     // Función para actualizar el DOM del menú de la aplicación
     function updateHamburguerMenu(ev) {
@@ -236,6 +197,10 @@ $(document).ready(function () {
             $app.css('grid-template-columns', '50px 1fr');
             $aside.css('width', '50px');
             $hamburguer.css('position', 'absolute');
+            $('main').css({
+                overflow: ''
+            })
+            adjustItems();
         } else {
             $app.css('grid-template-columns', '350px 1fr');
             $aside.css('width', '350px');
@@ -243,13 +208,14 @@ $(document).ready(function () {
             $menu.css('margin-left', '50px');
             renderPlayLists();
         }
-        adjustItems();
     }
 
     // Manejar el clic en el botón hamburguesa
     $hamburguer.on('click', updateHamburguerMenu);
 
     function renderSongs() {
+        $('#artists-popular').empty();
+        $('#albums-popular').empty();
         $songsUl.empty();
         songs.forEach(song => {
                 const $li = $(`<li data-album-id="${song.albumId}" data-song-id="${song.id}" data-title="${song.title}" data-album="${song.album}">
@@ -304,6 +270,7 @@ $(document).ready(function () {
     } else {
         $songsUl.on('click', 'li', setSongsForPlayList);
     }
+
     // Función para actualizar el DOM del reproductor de audio
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');

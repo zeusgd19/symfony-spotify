@@ -34,7 +34,7 @@
 
         {% if albums is not empty %}
             <div id="albums-popular">
-                <h2 class="title-searches">Albumes Populares</h2>
+                <h2 class="title-searches">Nuevos Albumes</h2>
                 <ul id="albums-list-populars">
                     {% for album in albums %}
                         {% set image = album.images | length != 0 ? album.images[0].url :  asset("img/defectImg.svg") %}

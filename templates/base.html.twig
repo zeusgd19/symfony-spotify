@@ -13,6 +13,8 @@
         <link rel="stylesheet" href="{{ asset('CSS/styles.css') }}">
         <link rel="stylesheet" href="{{ asset('CSS/login.css') }}">
         <script src="{{ asset('JS/app.js') }}" type="module"></script>
+        <script src="{{ asset('JS/history.js') }}" type="module"></script>
+        <script src="{{ asset('JS/Observers.js') }}" type="module"></script>
         <script src="{{ asset('JS/login.js') }}"></script>
         {% block head %}
         {% endblock %}
@@ -105,7 +107,7 @@
                         <a href="">Home</a>
                     </li>
                     <li>
-                        <a href="">Your Library</a>
+                        <a href="" class="library-mobile">Your Library</a>
                     </li>
                 </ul>
             </div>
