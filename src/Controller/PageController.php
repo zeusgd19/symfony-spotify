@@ -17,7 +17,7 @@ class PageController extends AbstractController
     {
         $imagen = $session->get('imagen');
         if($this->getUser()){
-        $results = $spotifyService->getTopArtists();
+	$results = $spotifyService->getTopArtists();
         return $this->render('page/index.html.twig',[
             'imagen' => $imagen,
             'results' => $results ?? []
