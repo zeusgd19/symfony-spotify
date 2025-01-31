@@ -15,14 +15,22 @@ class PageController extends AbstractController
     #[Route('/', name: 'app_page')]
     public function index(SessionInterface $session, SpotifyService $spotifyService): Response
     {
+        $imagen = $session->get('imagen');
+        if($this->getUser()){
+        $results = $spotifyService->getTopArtists();
+        return $this->render('page/index.html.twig',[
+            'imagen' => $imagen,
+            'results' => $results ?? []
+        ]);
+        } else{
         $albums = $spotifyService->getNewAlbums();
         $results = $spotifyService->getPopularArtists();
-        $imagen = $session->get('imagen');
         return $this->render('page/index.html.twig',[
             'imagen' => $imagen,
             'results' => $results ?? [],
             'albums' => $albums ?? []
         ]);
+        }
     }
 
     #[Route('/login', name: 'app_login')]
