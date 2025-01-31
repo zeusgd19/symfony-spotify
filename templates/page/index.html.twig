@@ -49,6 +49,24 @@
                 </ul>
             </div>
         {% endif %}
+    {% else %}
+        {% if results is not empty %}
+        <div id="artists-popular">
+            <h2 class="title-searches">Artistas Populares</h2>
+            <ul id="artists-list-populars">
+                {% for artist in results %}
+                {% set image = artist.images | length != 0 ? artist.images[0].url :  asset("img/defectImg.svg") %}
+                <li class="artist" data-id="{{ artist.id }}">
+                    <div class="artist-img-back">
+                        <img data-src="{{ image }}" alt="{{ artist.name }}" class="artist-img lazy-load">
+                    </div>
+                    <p class="">{{ artist.name }}</p>
+                    <p>Artista</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     {% endif %}
         <ul id="songs">
         </ul>
