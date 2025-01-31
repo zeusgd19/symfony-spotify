@@ -31,7 +31,8 @@ class PageController extends AbstractController
             'results' => $results ?? [],
             'albums' => $albums ?? []
         ]);
-    }
+     }
+ }
     #[Route('/login', name: 'app_page')]
     public function login(): Response
     {
