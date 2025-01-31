@@ -20,7 +20,7 @@
             <ul id="artists-list-populars">
                 {% for artist in results %}
                 {% set image = artist.images | length != 0 ? artist.images[0].url :  asset("img/defectImg.svg") %}
-                <li class="artist" data-id="{{ artist.id }}">
+                <li class="artist artist-popular" data-id="{{ artist.id }}">
                     <div class="artist-img-back">
                         <img data-src="{{ image }}" alt="{{ artist.name }}" class="artist-img lazy-load">
                     </div>

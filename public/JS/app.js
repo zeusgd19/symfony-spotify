@@ -43,7 +43,7 @@ $(document).ready(function () {
 
     function adjustItems() {
         let $albums = $(".album");
-        let $artists = $(".artist");
+        let $artists = $(".artist-popular");
 
         $artists.each(function(index) {
             let hidden = false;
@@ -167,7 +167,6 @@ $(document).ready(function () {
         success: function (data) {
             playLists = data;
             renderPlayLists()
-            console.log(playLists)
         },
         error: function (error) {
             console.log(error)
@@ -244,9 +243,6 @@ $(document).ready(function () {
                 type: 'POST',
                 url: '/api/songs',
                 data: JSON.stringify({PlayListId: $liElement.data('id')}),
-                beforeSend: function(){
-                    $songsUl.append('<img src="/img/loading.gif"/>')
-                },
                 success: function (data){
                     songs = data;
                     console.log(songs)
@@ -339,7 +335,7 @@ $(document).ready(function () {
                         gap: 100
                     });
 
-		   isMarqueed = true;
+                    isMarqueed = true;
                 }
             }
         });
