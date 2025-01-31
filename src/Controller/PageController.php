@@ -16,7 +16,7 @@ class PageController extends AbstractController
     public function index(SessionInterface $session, SpotifyService $spotifyService): Response
     {
         if($this->getUser()){
-	$results = $spotifyService->getTopArtists();
+	    $results = $spotifyService->getTopArtists();
         $imagen = $session->get('imagen');
         return $this->render('page/index.html.twig',[
             'imagen' => $imagen,
@@ -33,7 +33,7 @@ class PageController extends AbstractController
         ]);
      }
  }
-    #[Route('/login', name: 'app_page')]
+    #[Route('/login', name: 'app_login')]
     public function login(): Response
     {
         return $this->render('login/index.html.twig');
