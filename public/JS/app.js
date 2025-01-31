@@ -24,9 +24,12 @@ $(document).ready(function () {
     $(window).on("resize", adjustItems);
 
     $('#back-home').on('click',function(){
-        $songsUl.empty();
-        $('main').append(main);
-        window.history.pushState({}, '', '/');
+        if(window.location.href !== "/"){
+            $('main').empty();
+            $songsUl.empty();
+            $('main').append(main);
+            window.history.pushState({}, '', '/');
+        }
     })
 
     $('[data-dropdown]').on('click', function(e) {
