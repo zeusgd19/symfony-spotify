@@ -173,7 +173,7 @@ class SpotifyService
     {
 
         $newToken = $this->getTokenWithoutLogin();
-        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/playlists/3mn4kXt07PEGZFR46h3HhN', [
+        $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/playlists/1ZFdeTzyCpFQVhC0Y3QwIc', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $newToken,
             ]
