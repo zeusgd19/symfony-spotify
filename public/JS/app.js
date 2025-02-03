@@ -136,9 +136,6 @@ $(document).ready(async function () {
                         url: '/search',
                         type: 'GET',
                         success: function (data) {
-                            $('#artists-popular').empty();
-                            $('#albums-popular').empty();
-                            $('#songs').empty();
                             $('main').empty();
                             $('main').append(data);
                             setArtistsAndSongSearched(artists.items, tracks.items);
@@ -270,7 +267,6 @@ $(document).ready(async function () {
                 data: JSON.stringify({PlayListId: $liElement.data('id')}),
                 success: function (data){
                     songs = data;
-                    console.log(songs)
                     renderSongs();
                 },
                 error: function(error){
@@ -315,9 +311,6 @@ $(document).ready(async function () {
             src: `music/${$liElement.data('album-id')}/${$liElement.data('title')}.mp3`,
             preload: 'metadata'
         });
-
-        console.log($audio)
-        console.log($audioAnterior)
 
         if ($audioAnterior.length) {
             $audioAnterior[0].pause();
@@ -397,7 +390,12 @@ $(document).ready(async function () {
         const segundos = Math.floor(tiempoActual % 60).toString().padStart(2, '0');
 
         if(ev.target.paused){
-            $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+            if(ev.target.currentTime >= ev.target.duration){
+                ev.target.currentTime = 0;
+                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+            } else {
+                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+            }
         } else {
             $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
         }
