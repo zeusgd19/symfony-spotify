@@ -243,6 +243,12 @@ main {
     margin-top: 10px;
 }
 
+.options a.active {
+  background-color: #333332;
+  box-shadow: 1px 1px 1px #555555;
+  pointer-events: none;
+}
+
 .options a {
     padding: 10px;
     border-radius: 30px;

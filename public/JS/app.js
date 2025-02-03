@@ -138,6 +138,16 @@ $(document).ready(async function () {
                         success: function (data) {
                             $('main').empty();
                             $('main').append(data);
+                            $('.options').on('click','a',function() {
+                                let clicked = $(this)
+                                $('.options a').each(function (){
+                                console.log($(this))
+                                    if($(this) != clicked){
+                                        $(this).removeClass('active');
+                                    }
+                                })
+                                $(this).addClass('active');
+                            })
                             setArtistsAndSongSearched(artists.items, tracks.items);
                         }
                     })
