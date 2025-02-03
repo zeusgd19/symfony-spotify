@@ -16,37 +16,30 @@ class PageController extends AbstractController
     public function index(SessionInterface $session, SpotifyService $spotifyService, Request $request): Response
     {
 
+        $imagen = $session->get('imagen');
+
         if($this->getUser()){
-	    $results = $spotifyService->getTopArtists();
-        $imagen = $session->get('imagen');
-        if($request->isXmlHttpRequest()) {
-            return $this->render('partials/_index_main.html.twig',[
-                'imagen' => $imagen,
-                'results' => $results ?? []
-            ]);
-        }
-        return $this->render('page/index.html.twig',[
-            'imagen' => $imagen,
-            'results' => $results ?? []
-        ]);
+            $results = $spotifyService->getTopArtists();
         } else{
-        $albums = $spotifyService->getNewAlbums();
-        $results = $spotifyService->getPopularArtists();
-        $imagen = $session->get('imagen');
+            $albums = $spotifyService->getNewAlbums();
+            $results = $spotifyService->getPopularArtists();
+        }
+
         if($request->isXmlHttpRequest()) {
             return $this->render('partials/_index_main.html.twig',[
                 'imagen' => $imagen,
                 'results' => $results ?? [],
                 'albums' => $albums ?? []
             ]);
+        } else {
+            return $this->render('page/index.html.twig',[
+                'imagen' => $imagen,
+                'results' => $results ?? [],
+                'albums' => $albums ?? []
+            ]);
         }
-        return $this->render('page/index.html.twig',[
-            'imagen' => $imagen,
-            'results' => $results ?? [],
-            'albums' => $albums ?? []
-        ]);
-     }
- }
+    }
+
     #[Route('/login', name: 'app_login')]
     public function login(): Response
     {

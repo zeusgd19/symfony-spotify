@@ -392,7 +392,6 @@ $(document).ready(async function () {
         if(ev.target.paused){
             if(ev.target.currentTime >= ev.target.duration){
                 ev.target.currentTime = 0;
-                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
             } else {
                 $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
             }
