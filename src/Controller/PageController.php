@@ -13,11 +13,18 @@ use Symfony\Component\Routing\Attribute\Route;
 class PageController extends AbstractController
 {
     #[Route('/', name: 'app_page')]
-    public function index(SessionInterface $session, SpotifyService $spotifyService): Response
+    public function index(SessionInterface $session, SpotifyService $spotifyService, Request $request): Response
     {
+
         if($this->getUser()){
 	    $results = $spotifyService->getTopArtists();
         $imagen = $session->get('imagen');
+        if($request->isXmlHttpRequest()) {
+            return $this->render('partials/_index_main.html.twig',[
+                'imagen' => $imagen,
+                'results' => $results ?? []
+            ]);
+        }
         return $this->render('page/index.html.twig',[
             'imagen' => $imagen,
             'results' => $results ?? []
@@ -26,6 +33,13 @@ class PageController extends AbstractController
         $albums = $spotifyService->getNewAlbums();
         $results = $spotifyService->getPopularArtists();
         $imagen = $session->get('imagen');
+        if($request->isXmlHttpRequest()) {
+            return $this->render('partials/_index_main.html.twig',[
+                'imagen' => $imagen,
+                'results' => $results ?? [],
+                'albums' => $albums ?? []
+            ]);
+        }
         return $this->render('page/index.html.twig',[
             'imagen' => $imagen,
             'results' => $results ?? [],
@@ -45,7 +59,7 @@ class PageController extends AbstractController
         $results = null;
 
         if ($nombre !== "") {
-            $results = $spotifyService->search($nombre, ['artist'], 50);
+            $results = $spotifyService->search($nombre,['artist'], 50);
         }
 
         $imagen = $session->get('imagen');
@@ -67,7 +81,7 @@ class PageController extends AbstractController
             return $this->json(['error' => 'Debes ingresar un término de búsqueda'], 400);
         }
 
-        $results = $spotifyService->search($query, ['track', 'artist'], 50);
+        $results = $spotifyService->search($query, ['track', 'artist']);
         return $this->json($results);
     }
 }

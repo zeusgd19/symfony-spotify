@@ -1,5 +1,5 @@
 import {updateMediaSession} from './mediaSession.js'
-$(document).ready(function () {
+$(document).ready(async function () {
 
     const $playlistUl = $('#playlists');
     const $hamburguer = $('#hamburguer');
@@ -11,7 +11,10 @@ $(document).ready(function () {
     const $player = $('#player');
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
-    const main = $('main').html();
+    const main = await $.ajax({
+        type: 'GET',
+        url: '/'
+    })
 
     let $tiempoTotal = $('#tiempoTotal');
     let isMarqueed = false;
@@ -25,8 +28,8 @@ $(document).ready(function () {
 
     $('#back-home').on('click',function(){
         if(window.location.href !== "/"){
+            $('#search').val('');
             $('main').empty();
-            $songsUl.empty();
             $('main').append(main);
             window.history.pushState({}, '', '/');
         }
@@ -84,9 +87,11 @@ $(document).ready(function () {
         };
     }
 
-    function setArtistsSearched(artists){
+    function setArtistsAndSongSearched(artists,tracks){
         $('#artists-list').empty();
         $('#artists-list-populars').empty();
+        $('#artistsUser').empty();
+        $('#songs-list').empty();
         artists.forEach(artist => {
             const image = artist.images.length !== 0 ? artist.images[0].url : "/img/defectImg.svg";
             const $li = $(`<li class="artist" data-id="${artist.id}">
@@ -98,6 +103,21 @@ $(document).ready(function () {
             );
 
             $('#artists-list').append($li);
+        })
+
+        tracks.forEach(track => {
+            const image = track.album.images.length !== 0 ? track.album.images[0].url : "/img/defectImg.svg";
+            const artist = track.artists.length !== 0 ? track.artists[0].name: "";
+            const $li = $(`<li class="songSearched" data-id="${track.id}">
+                        <div class="song-img-back">
+                            <img data-src="${image}" alt="${track.name}" class="song-img lazy-load">
+                        </div>
+                        <div>
+                            <p>${track.name}</p>
+                            <p>${artist}</p>
+                        </div>`
+            );
+            $('#songs-list').append($li);
         })
     }
 
@@ -111,14 +131,17 @@ $(document).ready(function () {
                 data: { q: query },
                 success: function(response) {
                     const { artists, tracks } = response;
-                    console.log(artists.items)
+                    console.log(tracks)
                     $.ajax({
                         url: '/search',
                         type: 'GET',
                         success: function (data) {
+                            $('#artists-popular').empty();
+                            $('#albums-popular').empty();
+                            $('#songs').empty();
                             $('main').empty();
                             $('main').append(data);
-                            setArtistsSearched(artists.items);
+                            setArtistsAndSongSearched(artists.items, tracks.items);
                         }
                     })
                 },
@@ -177,6 +200,7 @@ $(document).ready(function () {
         ev.preventDefault();
         $('#artists-popular').empty();
         $('#albums-popular').empty();
+        $('#artistsUser').empty();
         $songsUl.empty();
         playLists.forEach(playList => {
             const $li = $(`<li data-album-id="${playList.albumId}" data-id="${playList.id}">
@@ -218,6 +242,7 @@ $(document).ready(function () {
     function renderSongs() {
         $('#artists-popular').empty();
         $('#albums-popular').empty();
+        $('#artistsUser').empty();
         $songsUl.empty();
         songs.forEach(song => {
                 const $li = $(`<li data-album-id="${song.albumId}" data-song-id="${song.id}" data-title="${song.title}" data-album="${song.album}">

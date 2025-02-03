@@ -73,7 +73,7 @@ class SpotifyService
     /**
      * Obtén los artistas más escuchados del usuario.
      */
-    public function getTopArtists(int $limit = 5, string $timeRange = 'short_term'): array
+    public function getTopArtists(int $limit = 8, string $timeRange = 'short_term'): array
     {
         $response = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me/top/artists', [
             'headers' => [

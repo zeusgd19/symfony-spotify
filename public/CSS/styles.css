@@ -123,8 +123,14 @@ html, body {
     grid-area: profile;
     width: 30px;
     height: 30px;
-    margin-right: 20px;
-    margin-top: 10px;
+    border-radius: 100000px;
+    padding: 15px 20px 15px 20px;
+    justify-self: end;
+    justify-content: center;
+    align-items: center;
+    align-self: end;
+    margin: 0;
+    cursor: pointer;
 }
 
 aside {
@@ -181,7 +187,6 @@ aside::-webkit-scrollbar {
 img {
     width: 70px;
     height: 70px;
-    border-radius: 10px;
     margin: 5px;
 }
 
@@ -231,6 +236,25 @@ main {
     padding: 10px;
 }
 
+.options {
+    display: flex;
+    gap: 10px;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.options a {
+    padding: 10px;
+    border-radius: 30px;
+    background-color: #555555;
+    cursor: pointer;
+    transition: transform .2s ease-in;
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+
 /* Limitar el alto de las canciones para evitar que sobrepasen el contenedor */
 #songs {
     max-height: calc(100vh - 200px); /* Limita la altura y deja espacio para el footer */
@@ -244,21 +268,70 @@ main {
     background-color: #383737;
 }
 
-#artists-searched {
+#artists-searched, #songs-searched {
     display: grid;
     max-width: 2560px;
     margin: 0 20px;
+}
+
+#songs-list {
+    display: flex;
+}
+
+.songSearched {
+    display: flex;
+    gap: 10px;
 }
 
 #artists-popular, #albums-popular {
     display: grid;
 }
 
+#artistsUser {
+    display: grid;
+    margin-right: 10px;
+}
 
 
 #artists-list, #artists-list-populars, #albums-list-populars {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+#artistsTop-list-populars {
+    margin: 0 10px;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    grid-template-rows: 1fr 1fr;
+}
+
+.artistTop {
+    display: flex;
+    align-items: center;
+    max-height: 50px;
+    background-color: #555555;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    justify-content: center;
+    position: relative;
+
+    &:hover {
+        cursor: pointer;
+        background-color: #707070;
+    }
+}
+
+.artistTopName {
+    width: 100px;
+}
+
+.artistTop-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px 0 0 5px;
+    position: absolute;
+    top: -5px;
+    left: -5px;
 }
 
 .title-searches {
