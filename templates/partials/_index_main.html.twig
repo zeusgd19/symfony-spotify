@@ -1,3 +1,11 @@
+{% if app.user %}
+    <div id="dropdown1" class="dropdown">
+        <ul>
+            <li><a href="/logout">Cerrar Sesión</a></li>
+        </ul>
+    </div>
+{% endif %}
+
 {% if not app.user %}
     {% if results is not empty %}
         <div id="artists-popular">
