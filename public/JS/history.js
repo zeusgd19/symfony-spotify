@@ -1,5 +1,5 @@
 $(document).ready(function (){
-    if(window.location.href === '/'){
+    if(window.location.pathname === '/'){
         window.history.pushState({}, '', '/');
     }
 

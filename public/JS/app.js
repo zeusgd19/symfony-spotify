@@ -11,6 +11,9 @@ $(document).ready(async function () {
     const $player = $('#player');
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
+    const dialog = document.querySelector('.dialog-overview');
+    const closeButton = dialog.querySelector('sl-button[slot="footer"]');
+    closeButton.addEventListener('click', () => dialog.hide());
     const main = await $.ajax({
         type: 'GET',
         url: '/'
@@ -26,8 +29,36 @@ $(document).ready(async function () {
     adjustItems();
     $(window).on("resize", adjustItems);
 
+    $(document).on('click','.artist, .album', async function (){
+        const logged = await checkLoginStatus();
+
+        if(!logged){
+            dialog.show();
+            return;
+        } else{
+
+        }
+    })
+    async function checkLoginStatus() {
+        try {
+            const response = await $.ajax({
+                type: 'GET',
+                url: '/api/user'
+            });
+            if (!response.ok) {
+                throw new Error('Not logged in');
+            }
+
+            let userData = await response.json();
+            console.log('User logged in:', userData.username);
+            return true;  // El usuario está autenticado
+        } catch (error) {
+            return false; // El usuario no está autenticado
+        }
+    }
+
     $('#back-home').on('click',function(){
-        if(window.location.href !== "/"){
+        if(window.location.pathname !== "/"){
             $('#search').val('');
             $('main').empty();
             $('main').append(main);

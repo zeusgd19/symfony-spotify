@@ -12,9 +12,23 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 #[Route('/api', name: 'api_')]
 class PlayListController extends AbstractController
 {
+
+    #[Route('/user', name: 'app_user')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function getUserInfo(): JsonResponse
+    {
+        $user = $this->getUser();
+        return $this->json([
+            'username' => $user-getName(),
+            'email' => $user->getEmail(),
+        ]);
+    }
+
     #[Route('/playlists', name: 'app_play_list')]
     public function playlists(ManagerRegistry $doctrine)
     {

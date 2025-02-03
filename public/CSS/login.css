@@ -4,7 +4,7 @@
 	justify-content: space-between;
 }
 
-#login{
+.login{
     display: flex;
     grid-area: profile;
     font-weight: 700;
@@ -21,7 +21,7 @@
     transition: transform 0.1s ease, background-color 0.1s ease;
 }
 
-#login:hover{
+.login:hover{
     transform: scale(1.06);
     background-color: #DDDDDD;
 }
