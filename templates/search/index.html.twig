@@ -1,6 +1,13 @@
 {% extends 'base.html.twig' %}
 {% block body %}
     <main>
+    {% if app.user %}
+        <div id="dropdown1" class="dropdown">
+            <ul>
+                <li><a href="/logout">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    {% endif %}
         <div class="options">
             <a class="btn-all">Todo</a>
             <a class="btn-artists">Artistas</a>

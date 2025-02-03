@@ -299,6 +299,7 @@ $(document).ready(async function () {
     function setAudioPlayerForSong(ev) {
         const $audioAnterior = $('#song');
         const $liElement = $(ev.target).closest('li');
+        const $player = $('#player');
         const artists = $liElement.find('#artists').text().substring($liElement.find('#artists').text().indexOf(":") + 1,$liElement.find('#artists').text().length)
         const $img = $(`<img id="image-song-card" src="${$liElement.find('img').attr('src')}" alt="Imagen Portada"/>`);
         const $title = $(`<p id="title-card-song">${$liElement.data('title')}</p>`)
@@ -325,7 +326,7 @@ $(document).ready(async function () {
         }
 
         if ($liElement.length) {
-            $liElement.append($audio);
+            $player.append($audio);
         }
 
         $audio.on('loadedmetadata', function () {
