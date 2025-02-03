@@ -6,6 +6,7 @@ use App\Entity\Artist;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,14 +19,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class SpotifyController extends AbstractController
 {
 
-    private string $redirectUri = 'http://spotifyclone.shop/callback';
+    private string $redirectUri = 'http://localhost:8000/callback';
     private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
     }
-
 
     #[Route('/startLogin', name: 'app_spotify')]
     public function index(): Response

@@ -6,10 +6,12 @@
 	<title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="{{ asset('img/spotify.svg') }}">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace-autoloader.js"></script>
         <script src="{{ asset('JS/jquery.audioWave.js') }}"></script>
         <script src="{{ asset('JS/jquery.marquee.min.js') }}"></script>
         <script src="{{ asset('JS/jquery.pause.min.js') }}"></script>
         <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/themes/light.css" />
         <link rel="stylesheet" href="{{ asset('CSS/styles.css') }}">
         <link rel="stylesheet" href="{{ asset('CSS/login.css') }}">
         <script src="{{ asset('JS/app.js') }}" type="module"></script>
@@ -34,10 +36,16 @@
         {% if app.user %}
             <img src="{{ imagen }}" alt="Profile pic {{ app.user.email }}" class="profile-pic" data-dropdown="#dropdown1">
         {% else %}
-            <button id="login">Iniciar Sesión</button>
+            <button class="login">Iniciar Sesión</button>
         {% endif %}
     </div>
         <div id="app">
+            <sl-dialog label="Login" class="dialog-overview">
+                Inicia sesión para poder acceder a la canciones
+                <br>
+                <button class="login">Login</button>
+                <sl-button slot="footer" variant="primary">Close</sl-button>
+            </sl-dialog>
             <aside>
                 <div id="hamburguer">
                     <svg width="40" height="40" viewBox="0 0 100 80" fill="white" xmlns="http://www.w3.org/2000/svg">
