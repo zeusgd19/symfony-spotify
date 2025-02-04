@@ -6,6 +6,7 @@ use App\Entity\Artist;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +21,7 @@ class SpotifyController extends AbstractController
 {
 
     private string $redirectUri = 'http://spotifyclone.com/callback';
-    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played';
+    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played app-remote-control streaming user-modify-playback-state';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
     {
@@ -39,6 +40,19 @@ class SpotifyController extends AbstractController
             ]);
 
         return new RedirectResponse($authUrl);
+    }
+
+    #[Route('/spotifyToken', name: 'token')]
+    public function auth(SessionInterface $session): JsonResponse
+    {
+
+        $token = $session->get('token');
+
+        if (!$token) {
+            return $this->json(['error' => 'No token available'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $this->json(['token' => $token]);
     }
 
     #[Route('/callback', name: 'callback')]
