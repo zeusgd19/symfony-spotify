@@ -1,4 +1,5 @@
 import {updateMediaSession} from './mediaSession.js'
+
 $(document).ready(async function () {
 
     const $playlistUl = $('#playlists');
@@ -19,6 +20,29 @@ $(document).ready(async function () {
         url: '/'
     })
 
+    async function getSpotifyToken() {
+        const response = await fetch('/spotifyToken');
+        const data = await response.json();
+
+        if (data.token) {
+            return data.token;
+        } else {
+            console.error('Error getting token:', data.error);
+            return null;
+        }
+    }
+
+    async function playTrack(trackUri, token) {
+        await fetch("https://api.spotify.com/v1/me/player/play", {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ uris: [trackUri] })
+        });
+    }
+
     let $tiempoTotal = $('#tiempoTotal');
     let isMarqueed = false;
     let isPlaying = false;
@@ -26,6 +50,7 @@ $(document).ready(async function () {
     let playLists = [];
     let songs = [];
 
+    let token;
     adjustItems();
     $(window).on("resize", adjustItems);
 
@@ -39,23 +64,26 @@ $(document).ready(async function () {
 
         }
     })
-    async function checkLoginStatus() {
-        try {
-            const response = await $.ajax({
-                type: 'GET',
-                url: '/api/user'
-            });
-            if (!response.ok) {
-                throw new Error('Not logged in');
-            }
 
-            let userData = await response.json();
-            console.log('User logged in:', userData.username);
-            return true;  // El usuario está autenticado
-        } catch (error) {
-            return false; // El usuario no está autenticado
-        }
+    async function checkLoginStatus() {
+            try {
+                const response = await $.ajax({
+                    type: 'GET',
+                    url: '/api/user'
+                });
+
+                let userData = await response;
+                return !!userData;
+            } catch (e){
+                return false;
+            }
     }
+
+    $(document).on('click',".songSearched",async function(){
+        const token = await getSpotifyToken();
+        console.log($(this).data('id'))
+        playTrack(`spotify:track:${$(this).data('id')}`,token);
+    })
 
     $('#back-home').on('click',function(){
         if(window.location.pathname !== "/"){

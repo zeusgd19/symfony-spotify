@@ -24,8 +24,7 @@ class PlayListController extends AbstractController
     {
         $user = $this->getUser();
         return $this->json([
-            'username' => $user-getName(),
-            'email' => $user->getEmail(),
+            'user' => $user
         ]);
     }
 

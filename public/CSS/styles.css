@@ -289,6 +289,10 @@ main {
     gap: 10px;
 }
 
+.songSearched:hover {
+    background-color: #555555;
+}
+
 #artists-popular, #albums-popular {
     display: grid;
 }
