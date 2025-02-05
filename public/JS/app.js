@@ -1,5 +1,50 @@
 import {updateMediaSession} from './mediaSession.js'
 
+async function transferPlaybackHere(deviceId, token) {
+    await fetch("https://api.spotify.com/v1/me/player", {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ device_ids: [deviceId], play: true })
+    });
+}
+
+async function getSpotifyToken() {
+    const response = await fetch('/spotifyToken');
+    const data = await response.json();
+
+    if (data.token) {
+        return data.token;
+    } else {
+        console.error('Error getting token:', data.error);
+        return null;
+    }
+}
+
+let player;
+
+window.onSpotifyWebPlaybackSDKReady = async () => {
+    const token = await getSpotifyToken()
+    player = new Spotify.Player({
+        name: 'Spotify Clone',
+        getOAuthToken: cb => {cb(token);},
+        enableMediaSession: true
+    });
+
+    player.addListener("ready", ({ device_id }) => {
+        console.log("Dispositivo listo:", device_id);
+        transferPlaybackHere(device_id, token);
+    });
+
+    player.connect().then(success => {
+        if (success) {
+            console.log('Connected to Spotify Player!');
+        }
+    });
+};
+
 $(document).ready(async function () {
 
     const $playlistUl = $('#playlists');
@@ -15,10 +60,36 @@ $(document).ready(async function () {
     const dialog = document.querySelector('.dialog-overview');
     const closeButton = dialog.querySelector('sl-button[slot="footer"]');
     closeButton.addEventListener('click', () => dialog.hide());
+
     const main = await $.ajax({
         type: 'GET',
         url: '/'
     })
+    let position = 0;
+    let duration = 0;
+    let interval;
+
+    function resumableInterval(callback, delay) {
+        var timerId, start, remaining = delay;
+
+        this.pause = function() {
+            window.clearTimeout(timerId);
+            remaining -= new Date() - start;
+        };
+
+        var resume = function() {
+            start = new Date();
+            timerId = window.setTimeout(function() {
+                remaining = delay;
+                resume();
+                callback();
+            }, remaining);
+        };
+
+        this.resume = resume;
+
+        this.resume();
+    }
 
     async function getSpotifyToken() {
         const response = await fetch('/spotifyToken');
@@ -50,7 +121,6 @@ $(document).ready(async function () {
     let playLists = [];
     let songs = [];
 
-    let token;
     adjustItems();
     $(window).on("resize", adjustItems);
 
@@ -82,8 +152,94 @@ $(document).ready(async function () {
     $(document).on('click',".songSearched",async function(){
         const token = await getSpotifyToken();
         console.log($(this).data('id'))
+        /*
+        const duracion = $(this).data('duration');
+        const minutos = Math.floor(duracion / 60000);
+        const segundos = Math.floor(duracion % 60000).toString().padStart(2, '0');
+        const segundosSubstring = segundos.substring(0,2);
+        $slider.attr("max",duracion / 1000);
+        console.log($slider.val())
+        intervalSpotifyTime = new resumableInterval(function (){
+            $slider.val(tiempo++);
+            segundosRecorridos++;
+            if(segundosRecorridos >= 60){
+                segundosRecorridos = 0;
+                minutosRecorridos++;
+            }
+            let minutosRecorridosString = minutosRecorridos.toString().padStart(2,'0')
+            let segundosRecorridosString = segundosRecorridos.toString().padStart(2,'0');
+            $('#tiempoRecorrido').text(`${minutosRecorridosString}:${segundosRecorridosString}`);
+        },1000);
+        $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
+        */
         playTrack(`spotify:track:${$(this).data('id')}`,token);
+        player.addListener('player_state_changed', (state) => {
+            if (!state) return;
+
+            console.log(state);
+
+            isPlaying = !state.paused;
+            position = state.position / 1000; // Convertir a segundos
+            duration = state.duration / 1000;
+
+            // Actualizar icono de play/pausa
+            if (state.paused) {
+                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+                $('.marquee').marquee('pause');
+            } else {
+                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+                const minutos = Math.floor(duration / 60);
+                const segundos = Math.floor(duration % 60).toString().padStart(2, '0');
+                $tiempoTotal.text(`${minutos}:${segundos}`);
+
+                const $img = $(`<img id="image-song-card" src="${state.track_window.current_track.album.images[0].url}" alt="Imagen Portada"/>`);
+                const $title = $(`<p id="title-card-song">${state.track_window.current_track.album.name}</p>`)
+                const $artist = $(`<p id="artists-card-song" class="marquee">${state.track_window.current_track.artists[0].name}</p>`)
+                const $div = $('<div></div>')
+                isMarqueed = false;
+                $('#song-card').empty();
+                $('#song-card').append($div)
+                $('#song-card').prepend($img).find('div').append($title).append($artist);
+
+                if(!isMarqueed) {
+                    $('#artists-card-song').marquee({
+                        speed: 50,
+                        allowCss3Support: true,
+                        css3easing: 'linear',
+                        delayBeforStart: -1,
+                        easing: 'linear',
+                        direction: 'left',
+                        gap: 100
+                    });
+
+                    isMarqueed = true;
+                }
+            }
+
+            updateProgressBar();
+
+            if (isPlaying) {
+                if (interval) clearInterval(interval);
+                interval = setInterval(() => {
+                    position += 1;
+                    updateProgressBar();
+                }, 1000);
+            } else {
+                clearInterval(interval);
+            }
+        });
     })
+
+    function updateProgressBar() {
+        const minutos = Math.floor(position / 60);
+        const segundos = Math.floor(position % 60).toString().padStart(2, '0');
+
+        $('#tiempoRecorrido').text(`${minutos}:${segundos}`);
+        $slider.attr("max", duration);
+        $slider.val(position);
+
+
+    }
 
     $('#back-home').on('click',function(){
         if(window.location.pathname !== "/"){
@@ -167,7 +323,7 @@ $(document).ready(async function () {
         tracks.forEach(track => {
             const image = track.album.images.length !== 0 ? track.album.images[0].url : "/img/defectImg.svg";
             const artist = track.artists.length !== 0 ? track.artists[0].name: "";
-            const $li = $(`<li class="songSearched" data-id="${track.id}">
+            const $li = $(`<li class="songSearched" data-id="${track.id}" data-duration="${track.duration_ms}">
                         <div class="song-img-back">
                             <img data-src="${image}" alt="${track.name}" class="song-img lazy-load">
                         </div>
@@ -436,17 +592,31 @@ $(document).ready(async function () {
     // Función para manejar el botón de reproducción
     function getPlayer() {
         const $audio = $('#song');
-        if (isPlaying) {
-            isPlaying = false;
-            $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
-            $audio[0].pause();
-            $('.marquee').marquee('pause');
+        if($audio.length > 0) {
+            if (isPlaying) {
+                isPlaying = false;
+                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+                $audio[0].pause();
+                $('.marquee').marquee('pause');
+            } else {
+                isPlaying = true;
+                $audio[0].play();
+                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+                $('.marquee').marquee('resume');
+                $audio.on('timeupdate', updateTime);
+            }
         } else {
-            isPlaying = true;
-            $audio[0].play();
-            $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
-            $('.marquee').marquee('resume');
-            $audio.on('timeupdate', updateTime);
+            if(isPlaying){
+                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+                player.pause().then(() => {
+                    console.log('Paused!');
+                });
+            } else {
+                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+                player.resume().then(() => {
+                    console.log('Resumed!');
+                });
+            }
         }
     }
 
@@ -471,10 +641,16 @@ $(document).ready(async function () {
         $('#tiempoRecorrido').text(`${minutos}:${segundos}`);
         $slider.attr('max', ev.target.duration);
         $slider.val(tiempoActual);
-
-        $slider.on('input', function (ev) {
-            const $audio = $('#song');
-            $audio[0].currentTime = ev.target.value;
-        });
     }
+
+    $slider.on('input', function (ev) {
+        const $audio = $('#song');
+        if($audio.length > 0) {
+            $audio[0].currentTime = ev.target.value;
+        } else {
+            player.seek($(this).val() * 1000).then(()=> {
+                console.log("Change Position")
+            })
+        }
+    });
 });
