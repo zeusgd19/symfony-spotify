@@ -7,7 +7,7 @@ async function transferPlaybackHere(deviceId, token) {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ device_ids: [deviceId], play: true })
+        body: JSON.stringify({ device_ids: [deviceId], play: false })
     });
 }
 
@@ -28,7 +28,7 @@ let player;
 window.onSpotifyWebPlaybackSDKReady = async () => {
     const token = await getSpotifyToken()
     player = new Spotify.Player({
-        name: 'Spotify Clone',
+        name: 'Spotify Clone Web',
         getOAuthToken: cb => {cb(token);},
         enableMediaSession: true
     });
@@ -53,7 +53,7 @@ $(document).ready(async function () {
     const $menu = $('#menu');
     const $app = $('#app');
     const $aside = $('aside');
-    const $songsUl = $('#songs');
+    let $songsUl = $('#songs');
     const $player = $('#player');
     const $playSvg = $('#play-svg');
     const $slider = $('#slider');
@@ -246,6 +246,7 @@ $(document).ready(async function () {
             $('#search').val('');
             $('main').empty();
             $('main').append(main);
+            $songsUl = $('main').find('#songs');
             window.history.pushState({}, '', '/');
         }
     })
@@ -307,33 +308,39 @@ $(document).ready(async function () {
         $('#artists-list-populars').empty();
         $('#artistsUser').empty();
         $('#songs-list').empty();
-        artists.forEach(artist => {
-            const image = artist.images.length !== 0 ? artist.images[0].url : "/img/defectImg.svg";
-            const $li = $(`<li class="artist" data-id="${artist.id}">
-                    <div class="artist-img-back">
-                        <img data-src="${image}" alt="${artist.name}" class="artist-img lazy-load">
-                    </div>
-                    <p>${artist.name}</p>
-                    <p>Artista</p>`
-            );
-
-            $('#artists-list').append($li);
-        })
-
-        tracks.forEach(track => {
-            const image = track.album.images.length !== 0 ? track.album.images[0].url : "/img/defectImg.svg";
-            const artist = track.artists.length !== 0 ? track.artists[0].name: "";
-            const $li = $(`<li class="songSearched" data-id="${track.id}" data-duration="${track.duration_ms}">
-                        <div class="song-img-back">
-                            <img data-src="${image}" alt="${track.name}" class="song-img lazy-load">
+        if(artists){
+            artists = artists.items;
+            artists.forEach(artist => {
+                const image = artist.images.length !== 0 ? artist.images[0].url : "/img/defectImg.svg";
+                const $li = $(`<li class="artist" data-id="${artist.id}">
+                        <div class="artist-img-back">
+                            <img data-src="${image}" alt="${artist.name}" class="artist-img lazy-load">
                         </div>
-                        <div>
-                            <p>${track.name}</p>
-                            <p>${artist}</p>
-                        </div>`
-            );
-            $('#songs-list').append($li);
-        })
+                        <p>${artist.name}</p>
+                        <p>Artista</p>`
+                );
+
+                $('#artists-list').append($li);
+            })
+        }
+
+        if(tracks){
+            tracks = tracks.items
+            tracks.forEach(track => {
+                const image = track.album.images.length !== 0 ? track.album.images[0].url : "/img/defectImg.svg";
+                const artist = track.artists.length !== 0 ? track.artists[0].name: "";
+                const $li = $(`<li class="songSearched" data-id="${track.id}" data-duration="${track.duration_ms}">
+                            <div class="song-img-back">
+                                <img data-src="${image}" alt="${track.name}" class="song-img lazy-load">
+                            </div>
+                            <div>
+                                <p>${track.name}</p>
+                                <p>${artist}</p>
+                            </div>`
+                );
+                $('#songs-list').append($li);
+            })
+        }
     }
 
     $('#search').on('input', debounce(function() {
@@ -353,7 +360,7 @@ $(document).ready(async function () {
                         success: function (data) {
                             $('main').empty();
                             $('main').append(data);
-                            $('.options').on('click','a',function() {
+                            $(document).on('click','.options a',function() {
                                 let clicked = $(this)
                                 $('.options a').each(function (){
                                 console.log($(this))
@@ -362,8 +369,10 @@ $(document).ready(async function () {
                                     }
                                 })
                                 $(this).addClass('active');
+                                let limit = $(this).data('type') == "all" ? null : 50
+                                getSearchedOption($(this).data('type'),query,limit);
                             })
-                            setArtistsAndSongSearched(artists.items, tracks.items);
+                            setArtistsAndSongSearched(artists, tracks);
                         }
                     })
                 },
@@ -373,6 +382,38 @@ $(document).ready(async function () {
             });
         }
     }, 500));
+
+
+    function getSearchedOption(option,query,limit = null){
+        let type = option == "all" ? null : option == "artists" ? 'artist' : 'track';
+        console.log(option)
+        let artists;
+        let tracks;
+        $.ajax({
+            type: 'POST',
+            url: '/query',
+            data: { q: query, type: type, limit: limit},
+            success: function(data){
+                if(option == "all"){
+                      artists = data.artists;
+                      tracks = data.tracks;
+                } else if(option == "artists"){
+                      artists = data.artists;
+                } else {
+                     tracks = data.tracks;
+                }
+                $.ajax({
+                    url: '/search',
+                    type: 'GET',
+                    success: function (data) {
+                        $('main').empty();
+                        $('main').append(data);
+                        setArtistsAndSongSearched(artists, tracks);
+                    }
+                })
+            }
+        })
+    }
 
     function renderPlayLists() {
         adjustItems();
@@ -476,7 +517,6 @@ $(document).ready(async function () {
                     </li>`);
                 $songsUl.append($li);
         });
-        isPlaying = false;
 
         $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
     }

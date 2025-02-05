@@ -69,12 +69,23 @@ class PageController extends AbstractController
     #[Route('/query', name: 'search')]
     public function query(Request $request,SpotifyService $spotifyService): Response {
         $query = $request->get('q');
+        $types = ['track','artist'];
+        $limit = 10;
 
+        $type = $request->get('type');
+        $numberLimit = $request->get('limit');
+
+        if($type){
+            $types = [$type];
+        }
+        if($numberLimit){
+            $limit = $numberLimit;
+        }
         if (!$query) {
             return $this->json(['error' => 'Debes ingresar un término de búsqueda'], 400);
         }
 
-        $results = $spotifyService->search($query, ['track', 'artist']);
+        $results = $spotifyService->search($query, $types, $limit);
         return $this->json($results);
     }
 }
