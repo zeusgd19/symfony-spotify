@@ -438,15 +438,10 @@ footer {
     align-items: flex-end;
 }
 
-footer > div {
-    position: relative;
-}
-
 #volumeContainer {
-    display: flex;
     position: absolute;
-    right: -150px;
-    top: 60px;
+    right: 700px;
+    bottom: 10px;
 }
 
 footer div {
@@ -488,7 +483,7 @@ footer div {
     align-items: center;
     color: white;
     position: absolute;
-    left: -375px;
+    left: 10px;
     gap: 10px;
 }
 

@@ -7,7 +7,7 @@ async function transferPlaybackHere(deviceId, token) {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ device_ids: [deviceId], play: false })
+        body: JSON.stringify({ device_ids: [deviceId], play: true })
     });
 }
 
@@ -24,6 +24,7 @@ async function getSpotifyToken() {
 }
 
 let player;
+let isConnected = false;
 
 window.onSpotifyWebPlaybackSDKReady = async () => {
     const token = await getSpotifyToken()
@@ -36,12 +37,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     player.addListener("ready", ({ device_id }) => {
         console.log("Dispositivo listo:", device_id);
         transferPlaybackHere(device_id, token);
-    });
-
-    player.connect().then(success => {
-        if (success) {
-            console.log('Connected to Spotify Player!');
-        }
     });
 };
 
@@ -68,28 +63,6 @@ $(document).ready(async function () {
     let position = 0;
     let duration = 0;
     let interval;
-
-    function resumableInterval(callback, delay) {
-        var timerId, start, remaining = delay;
-
-        this.pause = function() {
-            window.clearTimeout(timerId);
-            remaining -= new Date() - start;
-        };
-
-        var resume = function() {
-            start = new Date();
-            timerId = window.setTimeout(function() {
-                remaining = delay;
-                resume();
-                callback();
-            }, remaining);
-        };
-
-        this.resume = resume;
-
-        this.resume();
-    }
 
     async function getSpotifyToken() {
         const response = await fetch('/spotifyToken');
@@ -150,6 +123,17 @@ $(document).ready(async function () {
     }
 
     $(document).on('click',".songSearched",async function(){
+        if(!isConnected){
+            player.connect().then(success => {
+                if (success) {
+                    console.log('Connected to Spotify Player!');
+                    isConnected = true;
+                }
+            });
+        }
+        const $audio = $('#song');
+        $audio.pause();
+        $audio.remove();
         const token = await getSpotifyToken();
         console.log($(this).data('id'))
         /*
@@ -175,57 +159,58 @@ $(document).ready(async function () {
         playTrack(`spotify:track:${$(this).data('id')}`,token);
         player.addListener('player_state_changed', (state) => {
             if (!state) return;
-
             console.log(state);
+            if(isConnected) {
+                isPlaying = !state.paused;
+                position = state.position / 1000; // Convertir a segundos
+                duration = state.duration / 1000;
 
-            isPlaying = !state.paused;
-            position = state.position / 1000; // Convertir a segundos
-            duration = state.duration / 1000;
+                // Actualizar icono de play/pausa
+                if (state.paused) {
+                    $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
+                    $('.marquee').marquee('pause');
+                } else {
+                    $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+                    const minutos = Math.floor(duration / 60);
+                    const segundos = Math.floor(duration % 60).toString().padStart(2, '0');
+                    $tiempoTotal.text(`${minutos}:${segundos}`);
 
-            // Actualizar icono de play/pausa
-            if (state.paused) {
-                $playSvg.attr('d', 'M8 5.14v14l11-7-11-7z');
-                $('.marquee').marquee('pause');
-            } else {
-                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
-                const minutos = Math.floor(duration / 60);
-                const segundos = Math.floor(duration % 60).toString().padStart(2, '0');
-                $tiempoTotal.text(`${minutos}:${segundos}`);
+                    const $img = $(`<img id="image-song-card" src="${state.track_window.current_track.album.images[0].url}" alt="Imagen Portada"/>`);
+                    const $title = $(`<p id="title-card-song">${state.track_window.current_track.album.name}</p>`)
+                    const $artist = $(`<p id="artists-card-song" class="marquee">${state.track_window.current_track.artists[0].name}</p>`)
+                    const $div = $('<div></div>')
+                    isMarqueed = false;
+                    $('#song-card').empty();
+                    $('#song-card').append($div)
+                    $('#song-card').prepend($img).find('div').append($title).append($artist);
 
-                const $img = $(`<img id="image-song-card" src="${state.track_window.current_track.album.images[0].url}" alt="Imagen Portada"/>`);
-                const $title = $(`<p id="title-card-song">${state.track_window.current_track.album.name}</p>`)
-                const $artist = $(`<p id="artists-card-song" class="marquee">${state.track_window.current_track.artists[0].name}</p>`)
-                const $div = $('<div></div>')
-                isMarqueed = false;
-                $('#song-card').empty();
-                $('#song-card').append($div)
-                $('#song-card').prepend($img).find('div').append($title).append($artist);
+                    if (!isMarqueed) {
+                        $('#artists-card-song').marquee({
+                            speed: 50,
+                            allowCss3Support: true,
+                            css3easing: 'linear',
+                            delayBeforStart: -1,
+                            easing: 'linear',
+                            direction: 'left',
+                            gap: 100
+                        });
 
-                if(!isMarqueed) {
-                    $('#artists-card-song').marquee({
-                        speed: 50,
-                        allowCss3Support: true,
-                        css3easing: 'linear',
-                        delayBeforStart: -1,
-                        easing: 'linear',
-                        direction: 'left',
-                        gap: 100
-                    });
-
-                    isMarqueed = true;
+                        isMarqueed = true;
+                    }
                 }
-            }
 
-            updateProgressBar();
+                updateProgressBar();
 
-            if (isPlaying) {
-                if (interval) clearInterval(interval);
-                interval = setInterval(() => {
-                    position += 1;
-                    updateProgressBar();
-                }, 1000);
-            } else {
-                clearInterval(interval);
+                if (isPlaying) {
+                    if (interval) clearInterval(interval);
+                    interval = setInterval(() => {
+                        position += 1;
+                        updateProgressBar();
+                        console.log("hola")
+                    }, 1000);
+                } else {
+                    clearInterval(interval);
+                }
             }
         });
     })
@@ -551,13 +536,20 @@ $(document).ready(async function () {
     // Manejar el click en cada playList
     if(window.innerWidth > 480){
         $playlistUl.on('click', 'li', setSongsForPlayList);
-        $songsUl.on('click', 'li', setAudioPlayerForSong);
+        $(document).on('click', '#songs li', setAudioPlayerForSong);
     } else {
         $songsUl.on('click', 'li', setSongsForPlayList);
     }
 
     // Función para actualizar el DOM del reproductor de audio
     function setAudioPlayerForSong(ev) {
+        if(isConnected){
+            player.disconnect();
+            isConnected = false;
+            console.log("hola")
+            clearInterval(interval);
+            updateProgressBar();
+        }
         const $audioAnterior = $('#song');
         const $liElement = $(ev.target).closest('li');
         const $player = $('#player');
