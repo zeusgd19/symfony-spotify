@@ -438,6 +438,17 @@ footer {
     align-items: flex-end;
 }
 
+footer > div {
+    position: relative;
+}
+
+#volumeContainer {
+    display: flex;
+    position: absolute;
+    right: -150px;
+    top: 60px;
+}
+
 footer div {
     display: flex;
     flex-direction: column;

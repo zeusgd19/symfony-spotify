@@ -653,4 +653,12 @@ $(document).ready(async function () {
             })
         }
     });
+
+
+    $('#volume').on('input',function(){
+        player.setVolume($(this).val())
+        .then(() => {
+            console.log('Volume Changed');
+        })
+    })
 });
