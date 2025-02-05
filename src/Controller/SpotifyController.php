@@ -20,7 +20,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class SpotifyController extends AbstractController
 {
 
-    private string $redirectUri = 'http://spotifyclonoe.com/callback';
+    private string $redirectUri = 'http://spotifyclone.com/callback';
     private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played app-remote-control streaming user-modify-playback-state';
     private HttpClientInterface $httpClient;
     public function  __construct(HttpClientInterface $httpClient)
