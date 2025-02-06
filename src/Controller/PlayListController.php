@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -31,7 +32,7 @@ class PlayListController extends AbstractController
     }
 
     #[Route('/stream-audio/{nombre}', name: 'stream_audio')]
-    public function streamAudio(Request $request,String $nombre): JsonResponse
+    public function streamAudio(Request $request,String $nombre): Response
     {
         #$query = $request->query->get('query');
 
@@ -54,37 +55,22 @@ class PlayListController extends AbstractController
 
         $output = json_decode($process->getOutput(), true);
 
-        $command = [
-            'yt-dlp',
-            '--extract-audio',
-            '--audio-format', 'mp3',
-            '--quiet',
-            '--no-playlist',
-            '--get-url',  // Solo obtener la URL del audio
-            $output['audio_url']
-        ];
+        $command = "ffmpeg -i {$output['audio_url']} -vn -acodec libmp3lame -f mp3 pipe:1";
 
-        // Ejecutar el proceso con Symfony Process
-        $process = new Process($command);
-        $process->setTimeout(3600);  // Tiempo de espera (opcional)
+        // Ejecuta el comando FFmpeg
+        $audioStream = shell_exec($command);
 
-        try {
-            $process->mustRun();
-
-            // Obtener la URL de audio del proceso
-            $audioUrl = trim($process->getOutput());
-
-            // Ahora puedes usar ffmpeg o directamente transmitir la URL
-            return new JsonResponse([
-                'status' => 'success',
-                'audio_url' => $audioUrl
-            ]);
-        } catch (ProcessFailedException $exception) {
-            return new JsonResponse([
-                'error' => 'Error al procesar el video',
-                'message' => $exception->getMessage()
-            ], 500);
+        // Verifica si se obtuvo correctamente el stream de audio
+        if ($audioStream === null) {
+            return new Response("Error al procesar el video", 500);
         }
+
+        // Envía el audio al navegador en el formato correcto para la reproducción
+        $response = new Response($audioStream);
+        $response->headers->set('Content-Type', 'audio/mpeg');
+        $response->headers->set('Content-Disposition', 'inline; filename="audio.mp3"');
+
+        return $response;
     }
 
 
