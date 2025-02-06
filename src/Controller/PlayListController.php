@@ -55,24 +55,29 @@ class PlayListController extends AbstractController
         $output = json_decode($process->getOutput(), true);
 
         $command = [
-            'ffmpeg',
-            '-i', $output['audio_url'],       // URL del video a reproducir
-            '-vn',                 // Solo audio (sin video)
-            '-acodec', 'libmp3lame', // Codificar a MP3
-            '-f', 'mp3',           // Formato MP3
-            'pipe:1'               // Enviar la salida a stdout (streaming)
+            'yt-dlp',
+            '--extract-audio',
+            '--audio-format', 'mp3',
+            '--quiet',
+            '--no-playlist',
+            '--get-url',  // Solo obtener la URL del audio
+            $output['audio_url']
         ];
 
+        // Ejecutar el proceso con Symfony Process
         $process = new Process($command);
         $process->setTimeout(3600);  // Tiempo de espera (opcional)
 
         try {
             $process->mustRun();
 
-            // Enviar la respuesta en vivo (streaming)
+            // Obtener la URL de audio del proceso
+            $audioUrl = trim($process->getOutput());
+
+            // Ahora puedes usar ffmpeg o directamente transmitir la URL
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'Audio streaming started'
+                'audio_url' => $audioUrl
             ]);
         } catch (ProcessFailedException $exception) {
             return new JsonResponse([
