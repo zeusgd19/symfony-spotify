@@ -440,7 +440,7 @@ footer {
 
 #volumeContainer {
     position: absolute;
-    right: 200px;
+    right: 295px;
     bottom: 10px;
 }
 
@@ -527,6 +527,12 @@ footer div {
 
 /* Media Queries para Responsividad */
 
+@media screen and (max-width: 1471px) {
+    #volumeContainer {
+        right: 70px;
+    }
+}
+
 /* Para pantallas medianas (tablets) */
 @media screen and (max-width: 768px) {
     #app {
@@ -557,6 +563,9 @@ footer div {
     #player {
         width: 30px;
         height: 30px;
+    }
+    #volumeContainer {
+        right: 70px;
     }
 }
 
