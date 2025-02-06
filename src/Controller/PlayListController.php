@@ -46,7 +46,8 @@ class PlayListController extends AbstractController
         $process->run();
 
         if (!$process->isSuccessful()) {
-            return new JsonResponse(['error' => 'Error executing script'], 500);
+            // Captura la salida de error también
+            return new JsonResponse(['error' => 'Error executing script', 'details' => $process->getErrorOutput()], 500);
         }
 
         $output = json_decode($process->getOutput(), true);
