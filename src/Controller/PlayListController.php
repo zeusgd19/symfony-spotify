@@ -40,17 +40,21 @@ class PlayListController extends AbstractController
 
         // Ruta del script en la carpeta bin/
         $scriptPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
+        $cookiesPath = $this->getParameter('kernel.project_dir') . '/bin/youtube_cookies.txt';
 
-        $process = new Process(['python3', $scriptPath, $nombre]);
-        $process->setTimeout(300);
-        $process->run();
+        $process1 = new Process(['yt-dlp', '--cookies', $cookiesPath, 'https://www.youtube.com']);
+        $process1->run();
 
-        if (!$process->isSuccessful()) {
+        $process2 = new Process(['python3', $scriptPath, $nombre]);
+        $process2->setTimeout(300);
+        $process2->run();
+
+        if (!$process2->isSuccessful()) {
             // Captura la salida de error también
-            return new JsonResponse(['error' => 'Error executing script', 'details' => $process->getErrorOutput()], 500);
+            return new JsonResponse(['error' => 'Error executing script', 'details' => $process2->getErrorOutput()], 500);
         }
 
-        $output = json_decode($process->getOutput(), true);
+        $output = json_decode($process2->getOutput(), true);
 
         if (isset($output['error'])) {
             return new JsonResponse(['error' => $output['error']], 500);
