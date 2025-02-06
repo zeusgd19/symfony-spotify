@@ -26,3 +26,5 @@
 ###< symfony/asset-mapper ###
 /bin/search.py
 /bin/oauth.json
+/bin/Pipfile
+/bin/Pipfile.lock
