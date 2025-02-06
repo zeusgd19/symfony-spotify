@@ -25,3 +25,4 @@
 /assets/vendor/
 ###< symfony/asset-mapper ###
 /bin/search.py
+/bin/oauth.json
