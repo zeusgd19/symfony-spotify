@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -27,6 +28,35 @@ class PlayListController extends AbstractController
             'user' => $user
         ]);
     }
+
+    #[Route('/stream-audio', name: 'stream_audio')]
+    public function streamAudio(Request $request): JsonResponse
+    {
+        $query = $request->query->get('query');
+
+        if (!$query) {
+            return new JsonResponse(['error' => 'No query provided'], 400);
+        }
+
+        // Ruta del script en la carpeta bin/
+        $scriptPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
+
+        $process = new Process(['python3', $scriptPath, $query]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return new JsonResponse(['error' => 'Error executing script'], 500);
+        }
+
+        $output = json_decode($process->getOutput(), true);
+
+        if (isset($output['error'])) {
+            return new JsonResponse(['error' => $output['error']], 500);
+        }
+
+        return new JsonResponse(['audio_url' => $output['audio_url']]);
+    }
+
 
     #[Route('/playlists', name: 'app_play_list')]
     public function playlists(ManagerRegistry $doctrine)
