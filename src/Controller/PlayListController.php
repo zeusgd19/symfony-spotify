@@ -29,19 +29,19 @@ class PlayListController extends AbstractController
         ]);
     }
 
-    #[Route('/stream-audio', name: 'stream_audio')]
-    public function streamAudio(Request $request): JsonResponse
+    #[Route('/stream-audio/{nombre}', name: 'stream_audio')]
+    public function streamAudio(Request $request,String $nombre): JsonResponse
     {
-        $query = $request->query->get('query');
+        #$query = $request->query->get('query');
 
-        if (!$query) {
-            return new JsonResponse(['error' => 'No query provided'], 400);
-        }
+        #if (!$query) {
+         #   return new JsonResponse(['error' => 'No query provided'], 400);
+        #}
 
         // Ruta del script en la carpeta bin/
         $scriptPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
 
-        $process = new Process(['python3', $scriptPath, $query]);
+        $process = new Process(['python3', $scriptPath, $nombre]);
         $process->run();
 
         if (!$process->isSuccessful()) {
