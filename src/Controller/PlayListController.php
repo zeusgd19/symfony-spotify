@@ -43,6 +43,7 @@ class PlayListController extends AbstractController
         $cookiesPath = $this->getParameter('kernel.project_dir') . '/bin/youtube_cookies.txt';
 
         $process1 = new Process(['yt-dlp', '--cookies', $cookiesPath, 'https://www.youtube.com']);
+        $process1->setTimeout(300);
         $process1->run();
 
         $process2 = new Process(['python3', $scriptPath, $nombre]);
