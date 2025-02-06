@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -53,11 +54,32 @@ class PlayListController extends AbstractController
 
         $output = json_decode($process->getOutput(), true);
 
-        if (isset($output['error'])) {
-            return new JsonResponse(['error' => $output['error']], 500);
-        }
+        $command = [
+            'ffmpeg',
+            '-i', $output['audio_url'],       // URL del video a reproducir
+            '-vn',                 // Solo audio (sin video)
+            '-acodec', 'libmp3lame', // Codificar a MP3
+            '-f', 'mp3',           // Formato MP3
+            'pipe:1'               // Enviar la salida a stdout (streaming)
+        ];
 
-        return new JsonResponse(['audio_url' => $output['audio_url']]);
+        $process = new Process($command);
+        $process->setTimeout(3600);  // Tiempo de espera (opcional)
+
+        try {
+            $process->mustRun();
+
+            // Enviar la respuesta en vivo (streaming)
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => 'Audio streaming started'
+            ]);
+        } catch (ProcessFailedException $exception) {
+            return new JsonResponse([
+                'error' => 'Error al procesar el video',
+                'message' => $exception->getMessage()
+            ], 500);
+        }
     }
 
 
