@@ -42,6 +42,7 @@ class PlayListController extends AbstractController
         $scriptPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
 
         $process = new Process(['python3', $scriptPath, $nombre]);
+        $process->setTimeout(300);
         $process->run();
 
         if (!$process->isSuccessful()) {
