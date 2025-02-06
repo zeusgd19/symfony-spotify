@@ -41,10 +41,11 @@ class PlayListController extends AbstractController
         #}
 
         // Ruta del script en la carpeta bin/
-        $scriptPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
+        $scriptSearchPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
+        $scriptAudioPath = $this->getParameter('kernel.project_dir') . '/bin/audio.py';
 
 
-        $process = new Process(['python3', $scriptPath, $nombre]);
+        $process = new Process(['python3', $scriptSearchPath, $nombre]);
         $process->setTimeout(300);
         $process->run();
 
@@ -55,6 +56,11 @@ class PlayListController extends AbstractController
 
         $output = json_decode($process->getOutput(), true);
 
+        $process = new Process(['python3', $scriptAudioPath, $output['audio_url']]);
+        $process->setTimeout(300);
+        $process->run();
+
+        $output = json_decode($process->getOutput(), true);
         $command = "ffmpeg -i {$output['audio_url']} -vn -acodec libmp3lame -f mp3 pipe:1";
 
         // Ejecuta el comando FFmpeg
