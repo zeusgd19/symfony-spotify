@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,8 +32,8 @@ class PlayListController extends AbstractController
         ]);
     }
 
-    #[Route('/stream-audio/{nombre}', name: 'stream_audio')]
-    public function streamAudio(Request $request,String $nombre): Response
+    #[Route('/stream-audio/{trackId}', name: 'stream_audio')]
+    public function streamAudio(Request $request,String $trackId, SessionInterface $session): Response
     {
         #$query = $request->query->get('query');
 
@@ -41,9 +42,40 @@ class PlayListController extends AbstractController
         #}
 
         // Ruta del script en la carpeta bin/
-        $scriptSearchPath = $this->getParameter('kernel.project_dir') . '/bin/search.py';
+        $scriptSearchPath = $this->getParameter('kernel.project_dir') . '/librespot/target/release/librespot';
         $scriptAudioPath = $this->getParameter('kernel.project_dir') . '/bin/audio.py';
 
+        $accessToken = $session->get('token');
+
+        // Comando para ejecutar Librespot, pasando el token y la canción a reproducir
+        $command = [
+            $scriptSearchPath,
+            '--access-token', $accessToken,
+            '--bitrate', '320',   // Puedes elegir la calidad (bitrate) de la canción
+            '--playback', '1',    // Esto reproduce la canción especificada
+            '--uri', "spotify:track:{$trackId}"  // URI de la canción
+        ];
+
+        // Usamos el componente Process de Symfony para ejecutar el comando
+        $process = new Process($command);
+        $process->setTimeout(3600); // Puedes ajustar el tiempo de espera si es necesario
+
+        $process->start();
+
+        // Flujo de salida de Librespot, que podrías redirigir al cliente como stream
+        $response = new StreamedResponse(function() use ($process) {
+            while ($process->isRunning()) {
+                echo $process->getIncrementalOutput();
+            }
+        });
+
+        // Configura los encabezados de la respuesta para flujo de audio
+        $response->headers->set('Content-Type', 'audio/mpeg');
+        $response->headers->set('Content-Disposition', 'inline; filename="track.mp3"');
+
+        return $response;
+    }
+    /*
 
         $process = new Process(['python3', $scriptSearchPath, $nombre]);
         $process->setTimeout(300);
@@ -77,7 +109,9 @@ class PlayListController extends AbstractController
         $response->headers->set('Content-Disposition', 'inline; filename="audio.mp3"');
 
         return $response;
+
     }
+    */
 
 
     #[Route('/playlists', name: 'app_play_list')]
