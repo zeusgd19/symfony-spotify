@@ -33,17 +33,10 @@ class PlayListController extends AbstractController
     }
 
     #[Route('/stream-audio/{trackId}', name: 'stream_audio')]
-    public function streamAudio(Request $request,String $trackId, SessionInterface $session): Response
+    public function streamAudio(Request $request, String $trackId, SessionInterface $session): Response
     {
-        #$query = $request->query->get('query');
-
-        #if (!$query) {
-         #   return new JsonResponse(['error' => 'No query provided'], 400);
-        #}
-
         // Ruta del script en la carpeta bin/
         $scriptSearchPath = $this->getParameter('kernel.project_dir') . '/librespot/target/release/librespot';
-        $scriptAudioPath = $this->getParameter('kernel.project_dir') . '/bin/audio.py';
 
         $accessToken = $session->get('token');
 
@@ -58,14 +51,18 @@ class PlayListController extends AbstractController
 
         // Usamos el componente Process de Symfony para ejecutar el comando
         $process = new Process($command);
-        $process->setTimeout(3600); // Puedes ajustar el tiempo de espera si es necesario
+        $process->setTimeout(3600); // Ajusta el tiempo de espera si es necesario
 
+        // Inicia el proceso
         $process->start();
 
         // Flujo de salida de Librespot, que podrías redirigir al cliente como stream
         $response = new StreamedResponse(function() use ($process) {
             while ($process->isRunning()) {
+                // Aquí, en lugar de hacer un echo directo, usamos un buffer para manejar el flujo de salida
                 echo $process->getIncrementalOutput();
+                ob_flush(); // Vaciamos el buffer de salida
+                flush();    // Enviamos los datos al navegador en tiempo real
             }
         });
 
