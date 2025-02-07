@@ -33,81 +33,83 @@ class PlayListController extends AbstractController
     }
 
     #[Route('/stream-audio/{trackId}', name: 'stream_audio')]
-    public function streamAudio(Request $request, String $trackId, SessionInterface $session): Response
+    public function streamAudio(Request $request, string $trackId): Response
     {
-        // Ruta del script en la carpeta bin/
-        $scriptSearchPath = $this->getParameter('kernel.project_dir') . '/librespot/target/release/librespot';
 
-        $accessToken = $session->get('token');
+        // Ruta del archivo temporal
+        $tempAudioFile = $this->getParameter('kernel.project_dir') . "/var/tmp/track_{$trackId}.mp3";
 
-        // Comando para ejecutar Librespot, pasando el token y la canción a reproducir
+        // Ejecuta el comando SpotDL para descargar la canción (solo si no está descargada aún)
         $command = [
-            $scriptSearchPath,
-            '--access-token', $accessToken,
-            '--bitrate', '320',   // Puedes elegir la calidad (bitrate) de la canción
-            '--playback', '1',    // Esto reproduce la canción especificada
-            '--uri', "spotify:track:{$trackId}"  // URI de la canción
+            'spotdl',
+            "https://open.spotify.com/track/{$trackId}",
+            "--output", $tempAudioFile,
         ];
 
-        // Usamos el componente Process de Symfony para ejecutar el comando
         $process = new Process($command);
-        $process->setTimeout(3600); // Ajusta el tiempo de espera si es necesario
-
-        // Inicia el proceso
-        $process->start();
-
-        // Flujo de salida de Librespot, que podrías redirigir al cliente como stream
-        $response = new StreamedResponse(function() use ($process) {
-            while ($process->isRunning()) {
-                // Aquí, en lugar de hacer un echo directo, usamos un buffer para manejar el flujo de salida
-                echo $process->getIncrementalOutput();
-                ob_flush(); // Vaciamos el buffer de salida
-                flush();    // Enviamos los datos al navegador en tiempo real
-            }
-        });
-
-        // Configura los encabezados de la respuesta para flujo de audio
-        $response->headers->set('Content-Type', 'audio/mpeg');
-
-        return $response;
-    }
-    /*
-
-        $process = new Process(['python3', $scriptSearchPath, $nombre]);
-        $process->setTimeout(300);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            // Captura la salida de error también
-            return new JsonResponse(['error' => 'Error executing script', 'details' => $process->getErrorOutput()], 500);
+            return new Response("Error al descargar la canción", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $output = json_decode($process->getOutput(), true);
+        // Configura la respuesta para el streaming de la canción
+        $response = new StreamedResponse(function () use ($tempAudioFile) {
+            $handle = fopen($tempAudioFile, 'rb');
+            while (!feof($handle)) {
+                echo fread($handle, 1024 * 8); // 8KB por fragmento
+                flush(); // Asegúrate de enviar los datos al cliente
+            }
+            fclose($handle);
 
-        $process = new Process(['python3', $scriptAudioPath, $output['audio_url']]);
-        $process->setTimeout(300);
-        $process->run();
+            // Elimina el archivo después de transmitir
+            unlink($tempAudioFile);
+        });
 
-        $output = json_decode($process->getOutput(), true);
-        $command = "ffmpeg -i {$output['audio_url']} -vn -acodec libmp3lame -f mp3 pipe:1";
-
-        // Ejecuta el comando FFmpeg
-        $audioStream = shell_exec($command);
-
-        // Verifica si se obtuvo correctamente el stream de audio
-        if ($audioStream === null) {
-            return new Response("Error al procesar el video", 500);
-        }
-
-        // Envía el audio al navegador en el formato correcto para la reproducción
-        $response = new Response($audioStream);
+        // Configura los encabezados para audio MP3
         $response->headers->set('Content-Type', 'audio/mpeg');
-        $response->headers->set('Content-Disposition', 'inline; filename="audio.mp3"');
+        $response->headers->set('Content-Disposition', 'inline; filename="track.mp3"');
 
         return $response;
-
     }
-    */
+
+/*
+
+    $process = new Process(['python3', $scriptSearchPath, $nombre]);
+    $process->setTimeout(300);
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+        // Captura la salida de error también
+        return new JsonResponse(['error' => 'Error executing script', 'details' => $process->getErrorOutput()], 500);
+    }
+
+    $output = json_decode($process->getOutput(), true);
+
+    $process = new Process(['python3', $scriptAudioPath, $output['audio_url']]);
+    $process->setTimeout(300);
+    $process->run();
+
+    $output = json_decode($process->getOutput(), true);
+    $command = "ffmpeg -i {$output['audio_url']} -vn -acodec libmp3lame -f mp3 pipe:1";
+
+    // Ejecuta el comando FFmpeg
+    $audioStream = shell_exec($command);
+
+    // Verifica si se obtuvo correctamente el stream de audio
+    if ($audioStream === null) {
+        return new Response("Error al procesar el video", 500);
+    }
+
+    // Envía el audio al navegador en el formato correcto para la reproducción
+    $response = new Response($audioStream);
+    $response->headers->set('Content-Type', 'audio/mpeg');
+    $response->headers->set('Content-Disposition', 'inline; filename="audio.mp3"');
+
+    return $response;
+
+}
+*/
 
 
     #[Route('/playlists', name: 'app_play_list')]
