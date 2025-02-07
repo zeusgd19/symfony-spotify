@@ -68,7 +68,6 @@ class PlayListController extends AbstractController
 
         // Configura los encabezados de la respuesta para flujo de audio
         $response->headers->set('Content-Type', 'audio/mpeg');
-        $response->headers->set('Content-Disposition', 'inline; filename="track.mp3"');
 
         return $response;
     }
