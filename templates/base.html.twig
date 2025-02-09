@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="description" content="Pagina que representa un clone de Spotify hecha con Symfony">
+        <meta name="author" content="Darius Gabriel Dobre">
+        <meta property="og:title" content="Spotify Clone | Symfony App">
+        <meta property="og:description" content="Pagina que representa un clone de Spotify hecha con Symfony, aplicando la
+        propia API de spotify para poder acceder a sus canciones,playlists y demas...">
+        <meta property="og:url" content="https://spotifyclone.com">
+        <meta property="og:image" content="https://spotifyclone.com/img/spotify.svg">
+        <meta property="og:author" content="Darius Gabriel Dobre">
+	    <title>{% block title %}Spotify Clone | Symfony App{% endblock %}</title>
         <link rel="icon" href="{{ asset('img/spotify.svg') }}">
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
