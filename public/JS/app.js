@@ -25,7 +25,7 @@ async function getSpotifyToken() {
 
 let player;
 let isConnected = false;
-
+let playerReady = false;
 window.onSpotifyWebPlaybackSDKReady = async () => {
     const token = await getSpotifyToken()
     player = new Spotify.Player({
@@ -33,6 +33,8 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         getOAuthToken: cb => {cb(token);},
         enableMediaSession: true
     });
+
+   console.log(player)
 
     player.addListener("ready", ({ device_id }) => {
         console.log("Dispositivo listo:", device_id);
@@ -55,7 +57,7 @@ $(document).ready(async function () {
     const dialog = document.querySelector('.dialog-overview');
     const closeButton = dialog.querySelector('sl-button[slot="footer"]');
     closeButton.addEventListener('click', () => dialog.hide());
-
+    let isAudioWaved = false;
     const main = await $.ajax({
         type: 'GET',
         url: '/'
@@ -86,13 +88,15 @@ $(document).ready(async function () {
                 },
                 body: JSON.stringify({uris: [trackUri]})
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
         }catch (e) {
-        	await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
-        }
+		console.log('Hola')
+        	const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
+        	const url = await response.text()
+		return url;
+	}
     }
 
     let $tiempoTotal = $('#tiempoTotal');
@@ -130,6 +134,8 @@ $(document).ready(async function () {
             }
     }
 
+    let songMap = new Map()
+
     $(document).on('click',".songSearched",async function(){
         if(!isConnected){
             player.connect().then(success => {
@@ -139,10 +145,8 @@ $(document).ready(async function () {
                 }
             });
         }
-        const $audio = $('#song');
-        $audio.pause();
-        $audio.remove();
         const token = await getSpotifyToken();
+	const id = $(this).data('id');
         console.log($(this).data('id'))
         /*
         const duracion = $(this).data('duration');
@@ -164,15 +168,58 @@ $(document).ready(async function () {
         },1000);
         $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
         */
-        const response = playTrack(`spotify:track:${$(this).data('id')}`,token);
-
-        response.then(data => {
-            if(data.toString().indexOf('https://p.scdn.co/')){
-                const $audio = $('<audio>', {
-                    id: 'song',
-                    src: data,
-                    preload: 'metadata'
-                });
+	let storedSongs = localStorage.getItem('reproducedSongs');
+	let response = "inicial";
+	if (storedSongs) {
+		console.log('Prueba')
+		let mapObject = JSON.parse(storedSongs);
+		songMap = new Map(Object.entries(mapObject));
+		if(!songMap.has(id)){
+        		response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+       		}
+	} else {
+		console.log('Primera vez')
+		response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+	}
+	console.log(response)
+	console.log(response.indexOf('https'))
+	console.log(songMap.has(id))
+	 if(response.indexOf('https') >= 0 || songMap.has(id) && !playerReady){
+		console.log('hola')
+		if(!songMap.has(id)){
+			songMap.set(id,response.substring(response.indexOf('preview/') + 8, response.length));
+		}
+		let mapObject = Object.fromEntries(songMap);
+		let $audio;
+		localStorage.setItem('reproducedSongs', JSON.stringify(mapObject));
+		const $audioAnterior = $('#song');
+		if($audioAnterior.length > 0){
+        		$audioAnterior.pause();
+        		$audioAnterior.remove();
+		}
+		if(songMap){
+		console.log('ha entrado')
+		console.log(songMap.get(id))
+		if(songMap.has(id)){
+			$audio = $('<audio>', {
+                    		id: 'song',
+                    		src: `/api/stream/${songMap.get(id)}`,
+                    		preload: 'metadata'
+                	});
+		} else {
+                	$audio = $('<audio>', {
+                    		id: 'song',
+                    		src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
+                    		preload: 'metadata'
+                	});
+		}
+		} else {
+			 $audio = $('<audio>', {
+                                id: 'song',
+                                src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
+                                preload: 'metadata'
+                        });
+		}
 
                 $player.append($audio);
 
@@ -190,12 +237,15 @@ $(document).ready(async function () {
                     $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
 
                     if(window.innerWidth > 480) {
+			if(!isAudioWaved){
                         $('#equalizer').audioWave({
                             audioElement: '#song',
                             waveColor: '#08ff00',
                             barWidth: 3,
                             barSpacing: 7,
                         });
+			isAudioWaved = true;
+			}
 
                         if(!isMarqueed) {
                             $('#artists-card-song').marquee({
@@ -213,8 +263,9 @@ $(document).ready(async function () {
                     }
                 });
 
+		$audio.on('timeupdate', updateTime);
+
             }
-        })
 
         player.addListener('player_state_changed', (state) => {
             if (!state) return;

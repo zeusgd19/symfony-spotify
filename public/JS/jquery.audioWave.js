@@ -30,15 +30,15 @@
 
     function createMediaSource() {
       try {
-        initializeAudioContext();
 
         // Si el nodo ya existe, no lo volvemos a crear
+	console.log(source)
         if (!source) {
           source = audioCtx.createMediaElementSource(audio);
           source.connect(analyser);
           analyser.connect(audioCtx.destination);
-        }
-      } catch (e) {
+      	}
+	} catch (e) {
         console.error('audioWave: No se pudo conectar el audio.', e);
       }
     }
