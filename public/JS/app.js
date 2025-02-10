@@ -92,7 +92,7 @@ $(document).ready(async function () {
             }
         }catch (e) {
         	await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
-	}
+        }
     }
 
     let $tiempoTotal = $('#tiempoTotal');
@@ -164,8 +164,58 @@ $(document).ready(async function () {
         },1000);
         $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
         */
-        playTrack(`spotify:track:${$(this).data('id')}`,token);
-        console.log(playTrack)
+        const response = playTrack(`spotify:track:${$(this).data('id')}`,token);
+
+        response.then(data => {
+            if(data.toString().indexOf('https://p.scdn.co/')){
+                const $audio = $('<audio>', {
+                    id: 'song',
+                    src: data,
+                    preload: 'metadata'
+                });
+
+                $player.append($audio);
+
+                $audio.on('loadedmetadata', function () {
+                    const duracion = $audio[0].duration;
+                    const minutos = Math.floor(duracion / 60);
+                    const segundos = Math.floor(duracion % 60).toString().padStart(2, '0');
+
+                    $tiempoTotal.text(`${minutos}:${segundos}`);
+                });
+
+                $audio.on('canplay', function () {
+                    $audio[0].play();
+                    isPlaying = true;
+                    $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+
+                    if(window.innerWidth > 480) {
+                        $('#equalizer').audioWave({
+                            audioElement: '#song',
+                            waveColor: '#08ff00',
+                            barWidth: 3,
+                            barSpacing: 7,
+                        });
+
+                        if(!isMarqueed) {
+                            $('#artists-card-song').marquee({
+                                speed: 50,
+                                allowCss3Support: true,
+                                css3easing: 'linear',
+                                delayBeforStart: -1,
+                                easing: 'linear',
+                                direction: 'left',
+                                gap: 100
+                            });
+
+                            isMarqueed = true;
+                        }
+                    }
+                });
+
+            }
+        })
+
         player.addListener('player_state_changed', (state) => {
             if (!state) return;
             console.log(state);
