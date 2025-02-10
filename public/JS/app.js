@@ -77,14 +77,26 @@ $(document).ready(async function () {
     }
 
     async function playTrack(trackUri, token) {
-        await fetch("https://api.spotify.com/v1/me/player/play", {
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ uris: [trackUri] })
-        });
+        try {
+          const response =  await fetch("https://api.spotify.com/v1/me/player/play", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({uris: [trackUri]})
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+        }catch (e) {
+            const url = `https://open.spotify.com/embed/track/${trackUri}?utm_source=oembed`
+            $('iframe').attr('src',url)
+            const data = $('iframe').find(document);
+
+            console.log(data)
+        }
     }
 
     let $tiempoTotal = $('#tiempoTotal');
