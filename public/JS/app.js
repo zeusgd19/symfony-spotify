@@ -91,12 +91,8 @@ $(document).ready(async function () {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
         }catch (e) {
-            const url = `https://open.spotify.com/embed/track/${trackUri}?utm_source=oembed`
-            $('iframe').attr('src',url)
-            const data = $('iframe').find(document);
-
-            console.log(data)
-        }
+        	await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
+	}
     }
 
     let $tiempoTotal = $('#tiempoTotal');
@@ -169,6 +165,7 @@ $(document).ready(async function () {
         $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
         */
         playTrack(`spotify:track:${$(this).data('id')}`,token);
+        console.log(playTrack)
         player.addListener('player_state_changed', (state) => {
             if (!state) return;
             console.log(state);

@@ -1,7 +1,9 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-    const browser = await puppeteer.launch({ headless: true }); // Cambia a true si no quieres ver la ventana del navegador
+    const browser = await puppeteer.launch(
+{ headless: true,
+  args: ['--no-sandbox'] }); // Cambia a true si no quieres ver la ventana del navegador
     const page = await browser.newPage();
 
     // Cargar el iframe de Spotify

@@ -105,32 +105,6 @@ class PlayListController extends AbstractController
         $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
-    #[Route('/preview/{trackId}', name: 'preview')]
-    public function getPreview(String $trackId){
-        $pathExtractScript = $this->getParameter('kernel.project_dir') . '/public/JS/extraer.js';
-
-        $command = [
-            'C:\Program Files\nodejs\node.exe',
-            $pathExtractScript,
-            $trackId
-        ];
-
-
-        $process = new Process($command);
-        $process->setEnv([
-            'TMPDIR' => sys_get_temp_dir(),  // Directorio temporal del sistema
-            'TEMP' => sys_get_temp_dir(),
-            'TMP' => sys_get_temp_dir()
-        ]);
-        $process->setTimeout(3000);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
-
-        return $process->getOutput();
-    }
 
     #[Route('/recommendations', name: 'recommendations')]
     public function recommendations(SpotifyService $spotifyService,SessionInterface $session){
