@@ -139,9 +139,6 @@ $(document).ready(async function () {
                 }
             });
         }
-        const $audio = $('#song');
-        $audio.pause();
-        $audio.remove();
         const token = await getSpotifyToken();
         console.log($(this).data('id'))
         /*
@@ -168,6 +165,11 @@ $(document).ready(async function () {
 
         response.then(data => {
             if(data.toString().indexOf('https://p.scdn.co/')){
+                const $audioAnterior = $('#song');
+                if($audioAnterior.length > 0)
+                $audioAnterior.pause();
+                $audioAnterior.remove();
+
                 const $audio = $('<audio>', {
                     id: 'song',
                     src: data,
