@@ -527,9 +527,9 @@ footer div {
 
 /* Media Queries para Responsividad */
 
-@media screen and (max-width: 1490px) {
+@media screen and (max-width: 1500px) {
     #volumeContainer {
-        right: 70px;
+        right: 215px;
     }
 }
 
