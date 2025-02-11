@@ -440,7 +440,7 @@ footer {
 
 #volumeContainer {
     position: absolute;
-    right: 295px;
+    right: 215px;
     bottom: 10px;
 }
 
@@ -525,13 +525,6 @@ footer div {
     display: none;
 }
 
-/* Media Queries para Responsividad */
-
-@media screen and (max-width: 1500px) {
-    #volumeContainer {
-        right: 215px;
-    }
-}
 
 /* Para pantallas medianas (tablets) */
 @media screen and (max-width: 768px) {
