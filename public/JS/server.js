@@ -16,7 +16,11 @@ const credentials = { key: privateKey, cert: certificate};
 
 // Ruta para servir archivos estáticos (HTML, CSS, JS, imágenes)
 app.use(express.static(path.join(__dirname)));
-app.use(cors());
+app.use(cors({
+    origin: '*', // Permite todas las fuentes
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization'
+}));
 // Ruta que ejecuta tu script con child_process
 app.get('/preview/:id', (req, res) => {
     const id = req.params.id; // Acceder a la id desde la URL
