@@ -182,9 +182,6 @@ $(document).ready(async function () {
 		console.log('Primera vez')
 		response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
 	}
-	console.log(response)
-	console.log(response.indexOf('https'))
-	console.log(songMap.has(id))
 	 if((response.indexOf('https') >= 0 || songMap.has(id)) && !playerReady){
 		console.log('hola')
 		if(!songMap.has(id)){
