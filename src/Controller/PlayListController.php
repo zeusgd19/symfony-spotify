@@ -130,7 +130,7 @@ class PlayListController extends AbstractController
             curl_close($ch);
         });
 
-        $response->headers->set('Content-Type', 'audio/mpeg');
+        $response->headers->set('Content-Type', 'audio/mp3');
 
         return $response;
     }
