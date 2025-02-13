@@ -108,32 +108,40 @@ class PlayListController extends AbstractController
     }
 
     #[Route('/stream/{url}', name: 'stream')]
-    public function streamAudio(String $url)
-    {
+public function streamAudio(String $url)
+{
+    $spotifyUrl = 'https://p.scdn.co/mp3-preview/' . $url;
 
-        $spotifyUrl = 'https://p.scdn.co/mp3-preview/'.$url;
-
-
-        $response = new StreamedResponse(function () use ($spotifyUrl) {
-
-            $ch = curl_init($spotifyUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HEADER, false);
-
-            $audioContent = curl_exec($ch);
-
-            if ($audioContent === false) {
-                echo "Error al obtener el archivo de audio.";
-            } else {
-                echo $audioContent;
-            }
-            curl_close($ch);
+    $response = new StreamedResponse(function () use ($spotifyUrl) {
+        $ch = curl_init($spotifyUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
+            echo $data;
+            flush();
+            return strlen($data);
         });
 
-        $response->headers->set('Content-Type', 'audio/mpeg');
+        // Si hay un error con cURL, mostrarlo
+        if (curl_exec($ch) === false) {
+            http_response_code(500);
+            echo "Error al obtener el audio.";
+        }
+        
+        curl_close($ch);
+    });
 
-        return $response;
-    }
+    // Cabeceras necesarias
+    $response->headers->set('Content-Type', 'audio/mpeg');
+    $response->headers->set('Accept-Ranges', 'bytes');
+    $response->headers->set('Connection', 'Keep-Alive');
+    $response->headers->set('Cache-Control', 'no-cache');
+
+    return $response;
+}
+
 
     #[Route('/recommendations', name: 'recommendations')]
     public function recommendations(SpotifyService $spotifyService,SessionInterface $session){
