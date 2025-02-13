@@ -149,6 +149,7 @@ $(document).ready(async function () {
                 }
             });
         }
+        const id = $(this).data('id');
         const token = await getSpotifyToken();
 
         if(!token){
@@ -159,11 +160,11 @@ $(document).ready(async function () {
                 let mapObject = JSON.parse(storedSongs);
                 songMap = new Map(Object.entries(mapObject));
                 if(!songMap.has(id)){
-                        response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+                        response = await playPreview(id);
                     }
             } else {
                 console.log('Primera vez')
-                response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+                response = await await playPreview(id);
             }
             console.log('hola')
             if(!songMap.has(id)){
@@ -245,7 +246,6 @@ $(document).ready(async function () {
 
             $audio.on('timeupdate', updateTime);
         } else {
-	    const id = $(this).data('id');
         console.log($(this).data('id'))
         /*
         const duracion = $(this).data('duration');
@@ -267,7 +267,7 @@ $(document).ready(async function () {
         },1000);
         $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
         */
-        playTrack(id,token)
+        playTrack(`spotify:track:${id}`,token)
         player.addListener('player_state_changed', (state) => {
             if (!state) return;
             console.log(state);
