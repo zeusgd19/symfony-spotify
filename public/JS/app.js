@@ -98,7 +98,7 @@ $(document).ready(async function () {
     }
 
     async function playPreview(trackUri){
-        const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
+        const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri}`)
         const url = await response.text()
         return url;
     }
