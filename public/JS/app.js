@@ -93,11 +93,14 @@ $(document).ready(async function () {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
         }catch (e) {
-		    console.log('Hola')
-        	const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
-        	const url = await response.text()
-		    return url;
-	}
+		    console.log(e)
+	    }
+    }
+
+    async function playPreview(trackUri){
+        const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
+        const url = await response.text()
+        return url;
     }
 
     let $tiempoTotal = $('#tiempoTotal');
@@ -147,7 +150,102 @@ $(document).ready(async function () {
             });
         }
         const token = await getSpotifyToken();
-	const id = $(this).data('id');
+
+        if(!token){
+            let storedSongs = localStorage.getItem('reproducedSongs');
+            let response = "inicial";
+            if (storedSongs) {
+                console.log('Prueba')
+                let mapObject = JSON.parse(storedSongs);
+                songMap = new Map(Object.entries(mapObject));
+                if(!songMap.has(id)){
+                        response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+                    }
+            } else {
+                console.log('Primera vez')
+                response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
+            }
+            console.log('hola')
+            if(!songMap.has(id)){
+                songMap.set(id,response.substring(response.indexOf('preview/') + 8, response.length));
+            }
+            let mapObject = Object.fromEntries(songMap);
+            let $audio;
+            localStorage.setItem('reproducedSongs', JSON.stringify(mapObject));
+            const $audioAnterior = $('#song');
+            if($audioAnterior.length > 0){
+                    $audioAnterior.pause();
+                    $audioAnterior.remove();
+            }
+            if(songMap){
+                console.log('ha entrado')
+                console.log(songMap.get(id))
+                if(songMap.has(id)){
+                    $audio = $('<audio>', {
+                                    id: 'song',
+                                    src: `/api/stream/${songMap.get(id)}`,
+                                    preload: 'metadata'
+                            });
+                } else {
+                            $audio = $('<audio>', {
+                                    id: 'song',
+                                    src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
+                                    preload: 'metadata'
+                            });
+                }
+            } else {
+                $audio = $('<audio>', {
+                            id: 'song',
+                            src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
+                            preload: 'metadata'
+                });
+            }
+
+            $player.append($audio);
+
+            $audio.on('loadedmetadata', function () {
+                const duracion = $audio[0].duration;
+                const minutos = Math.floor(duracion / 60);
+                const segundos = Math.floor(duracion % 60).toString().padStart(2, '0');
+
+                $tiempoTotal.text(`${minutos}:${segundos}`);
+            });
+
+            $audio.on('canplay', function () {
+                $audio[0].play();
+                isPlaying = true;
+                $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
+
+                if(window.innerWidth > 480) {
+                    if(!isAudioWaved){
+                            $('#equalizer').audioWave({
+                                audioElement: '#song',
+                                waveColor: '#08ff00',
+                                barWidth: 3,
+                                barSpacing: 7,
+                            });
+                    isAudioWaved = true;
+                    }
+
+                    if(!isMarqueed) {
+                        $('#artists-card-song').marquee({
+                            speed: 50,
+                            allowCss3Support: true,
+                            css3easing: 'linear',
+                            delayBeforStart: -1,
+                            easing: 'linear',
+                            direction: 'left',
+                            gap: 100
+                        });
+
+                        isMarqueed = true;
+                    }
+                }
+            });
+
+            $audio.on('timeupdate', updateTime);
+        } else {
+	    const id = $(this).data('id');
         console.log($(this).data('id'))
         /*
         const duracion = $(this).data('duration');
@@ -169,102 +267,7 @@ $(document).ready(async function () {
         },1000);
         $tiempoTotal.text(`${minutos}:${segundosSubstring}`);
         */
-	let storedSongs = localStorage.getItem('reproducedSongs');
-	let response = "inicial";
-	if (storedSongs) {
-		console.log('Prueba')
-		let mapObject = JSON.parse(storedSongs);
-		songMap = new Map(Object.entries(mapObject));
-		if(!songMap.has(id)){
-        		response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
-       		}
-	} else {
-		console.log('Primera vez')
-		response = await playTrack(`spotify:track:${$(this).data('id')}`,token);
-	}
-	 if((response.indexOf('https') >= 0 || songMap.has(id)) && !playerReady){
-		console.log('hola')
-		if(!songMap.has(id)){
-			songMap.set(id,response.substring(response.indexOf('preview/') + 8, response.length));
-		}
-		let mapObject = Object.fromEntries(songMap);
-		let $audio;
-		localStorage.setItem('reproducedSongs', JSON.stringify(mapObject));
-		const $audioAnterior = $('#song');
-		if($audioAnterior.length > 0){
-        		$audioAnterior.pause();
-        		$audioAnterior.remove();
-		}
-		if(songMap){
-		console.log('ha entrado')
-		console.log(songMap.get(id))
-		if(songMap.has(id)){
-			$audio = $('<audio>', {
-                    		id: 'song',
-                    		src: `/api/stream/${songMap.get(id)}`,
-                    		preload: 'metadata'
-                	});
-		} else {
-                	$audio = $('<audio>', {
-                    		id: 'song',
-                    		src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
-                    		preload: 'metadata'
-                	});
-		}
-		} else {
-			 $audio = $('<audio>', {
-                                id: 'song',
-                                src: `/api/stream/${response.substring(response.indexOf('preview/') + 8, response.length)}`,
-                                preload: 'metadata'
-                        });
-		}
-
-                $player.append($audio);
-
-                $audio.on('loadedmetadata', function () {
-                    const duracion = $audio[0].duration;
-                    const minutos = Math.floor(duracion / 60);
-                    const segundos = Math.floor(duracion % 60).toString().padStart(2, '0');
-
-                    $tiempoTotal.text(`${minutos}:${segundos}`);
-                });
-
-                $audio.on('canplay', function () {
-                    $audio[0].play();
-                    isPlaying = true;
-                    $playSvg.attr('d', 'M6 5h4v14H6zm8 0h4v14h-4z');
-
-                    if(window.innerWidth > 480) {
-			if(!isAudioWaved){
-                        $('#equalizer').audioWave({
-                            audioElement: '#song',
-                            waveColor: '#08ff00',
-                            barWidth: 3,
-                            barSpacing: 7,
-                        });
-			isAudioWaved = true;
-			}
-
-                        if(!isMarqueed) {
-                            $('#artists-card-song').marquee({
-                                speed: 50,
-                                allowCss3Support: true,
-                                css3easing: 'linear',
-                                delayBeforStart: -1,
-                                easing: 'linear',
-                                direction: 'left',
-                                gap: 100
-                            });
-
-                            isMarqueed = true;
-                        }
-                    }
-                });
-
-		$audio.on('timeupdate', updateTime);
-
-            }
-
+        playTrack(id,token)
         player.addListener('player_state_changed', (state) => {
             if (!state) return;
             console.log(state);
@@ -321,6 +324,7 @@ $(document).ready(async function () {
                 }
             }
         });
+    }
     })
 
     function updateProgressBar() {
