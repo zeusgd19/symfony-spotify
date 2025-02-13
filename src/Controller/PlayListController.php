@@ -60,7 +60,7 @@ class PlayListController extends AbstractController
         }
 
         $response = new JsonResponse($data);
-	$response->headers->set('Access-Control-Allow-Origin', '*');
+	    $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
 
@@ -110,34 +110,28 @@ class PlayListController extends AbstractController
     #[Route('/stream/{url}', name: 'stream')]
     public function streamAudio(String $url)
     {
-        // La URL de la previsualización del audio (esto normalmente lo obtienes de la API de Spotify)
-        $spotifyUrl = 'https://p.scdn.co/mp3-preview/'.$url; // Cambia esto por la URL que te interese
 
-        // Configurar el flujo de la respuesta
+        $spotifyUrl = 'https://p.scdn.co/mp3-preview/'.$url;
+
+
         $response = new StreamedResponse(function () use ($spotifyUrl) {
-            // Abrir un flujo cURL para obtener el contenido del archivo de audio
+
             $ch = curl_init($spotifyUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HEADER, false); // No queremos los headers de la respuesta
+            curl_setopt($ch, CURLOPT_HEADER, false);
 
-            // Ejecutar la solicitud y obtener el contenido del archivo de audio
             $audioContent = curl_exec($ch);
 
-            // Verificar si la solicitud fue exitosa
             if ($audioContent === false) {
                 echo "Error al obtener el archivo de audio.";
             } else {
-                echo $audioContent; // Esta es la parte que transmite el archivo al cliente
+                echo $audioContent;
             }
-
-            // Cerrar la conexión cURL
             curl_close($ch);
         });
 
-        // Establecer las cabeceras de la respuesta (tipo de contenido)
         $response->headers->set('Content-Type', 'audio/mpeg');
 
-        // Regresar la respuesta
         return $response;
     }
 

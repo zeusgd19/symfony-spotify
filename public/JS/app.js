@@ -39,6 +39,7 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     player.addListener("ready", ({ device_id }) => {
         console.log("Dispositivo listo:", device_id);
         transferPlaybackHere(device_id, token);
+        playerReady = true;
     });
 };
 
@@ -92,10 +93,10 @@ $(document).ready(async function () {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
         }catch (e) {
-		console.log('Hola')
+		    console.log('Hola')
         	const response = await fetch(`https://spotifyclone.com:3000/preview/${trackUri.substring(trackUri.indexOf('track:') + 6,trackUri.length)}`)
         	const url = await response.text()
-		return url;
+		    return url;
 	}
     }
 
@@ -184,7 +185,7 @@ $(document).ready(async function () {
 	console.log(response)
 	console.log(response.indexOf('https'))
 	console.log(songMap.has(id))
-	 if(response.indexOf('https') >= 0 || songMap.has(id) && !playerReady){
+	 if((response.indexOf('https') >= 0 || songMap.has(id)) && !playerReady){
 		console.log('hola')
 		if(!songMap.has(id)){
 			songMap.set(id,response.substring(response.indexOf('preview/') + 8, response.length));
