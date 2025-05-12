@@ -1,0 +1,20 @@
+knpu_oauth2_client:
+    clients:
+        spotify:
+            type: generic
+            provider_class: Kerox\OAuth2\Client\Provider\Spotify
+            client_id: '%env(CLIENT_ID)%'
+            client_secret: '%env(CLIENT_SECRET)%'
+            redirect_route: connect_spotify_check
+            redirect_params: {}
+            provider_options:
+                scope:
+                    - user-read-email
+                    - user-read-private
+                    - playlist-read-private
+                    - user-top-read
+                    - user-read-recently-played
+                    - app-remote-control
+                    - streaming
+                    - user-modify-playback-state
+        # configure your clients as described here: https://github.com/knpuniversity/oauth2-client-bundle#configuration

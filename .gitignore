@@ -30,3 +30,7 @@
 /bin/Pipfile
 /bin/Pipfile.lock
 /bin/youtube_cookies.txt
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

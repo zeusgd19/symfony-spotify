@@ -4,26 +4,30 @@ namespace App\Services;
 
 use Symfony\Component\HttpFoundation\Session\SessionFactory;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 
 class AccessTokenProvider
 {
-    private SessionInterface $session;
 
     public function __construct(SessionFactory $session)
     {
-        // Creamos la sesión a partir de la fábrica
-        $this->session = $session->createSession();
+        // Creamos la sesión a partir de la fábric
     }
 
-    public function getAccessToken(): ?string
+    public function getAccessToken(string $jwt): ?string
     {
 
-        return $this->session->get('token', "nothing");
-    }
+        if (!$jwt) {
+            return throw new TokenNotFoundException();
+        }
 
-    public function setAccessToken(string $token): void {
-        $this->session->set('token', $token);
-    }
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) {
+            throw new TokenNotFoundException();// formato JWT inválido
+        }
 
+        $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+        return $payload['spotify_token'] ?? '';
+    }
 
 }

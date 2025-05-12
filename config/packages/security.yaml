@@ -14,10 +14,14 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            lazy: true
+            pattern: ^/api/
             provider: app_user_provider
-            logout:
-                path: app_logout
+            stateless: true
+            jwt: ~
+        refresh:
+            provider: app_user_provider
+            refresh_jwt:
+                check_path: gesdinet_jwt_refresh_token
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -30,6 +34,9 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/popularArtists, roles: PUBLIC_ACCESS}
+        - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
+
 
 when@test:
     security:

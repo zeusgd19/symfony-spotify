@@ -1,133 +1,133 @@
 <?php
+// src/Controller/SpotifyController.php
 
 namespace App\Controller;
 
 use App\Entity\Artist;
+use App\Entity\RefreshToken;
 use Doctrine\Persistence\ManagerRegistry;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SpotifyController extends AbstractController
 {
-
-    private string $redirectUri = 'http://spotifyclone.shop/callback';
-    private string $scopes = 'user-read-email user-read-private playlist-read-private user-top-read user-read-recently-played app-remote-control streaming user-modify-playback-state';
-    private HttpClientInterface $httpClient;
-    public function  __construct(HttpClientInterface $httpClient)
-    {
-        $this->httpClient = $httpClient;
-    }
-
     #[Route('/startLogin', name: 'app_spotify')]
-    public function index(): Response
+    public function connectSpotify(ClientRegistry $clientRegistry): RedirectResponse
     {
-        $clientId = $this->getParameter('clientId');
-        $authUrl = 'https://accounts.spotify.com/authorize?' . http_build_query([
-                'response_type' => 'code',
-                'client_id' => $clientId,
-                'redirect_uri' => $this->redirectUri,
-                'scope' => $this->scopes,
-            ]);
-
-        return new RedirectResponse($authUrl);
+        // Esto genera la URL de Spotify con client_id, redirect_uri y scopes
+        return $clientRegistry
+            ->getClient('spotify')
+            ->redirect(
+                [
+                    'user-read-email',
+                    'user-read-private',
+                    'playlist-read-private',
+                    'user-top-read',
+                    'user-read-recently-played',
+                    'app-remote-control',
+                    'streaming',
+                    'user-modify-playback-state',
+                    'user-read-playback-state',
+                ],
+                ['prompt' => 'consent']
+            );
     }
 
-    #[Route('/spotifyToken', name: 'token')]
-    public function auth(SessionInterface $session): JsonResponse
+    #[Route('/connect/spotify/check', name: 'connect_spotify_check')]
+    public function connectSpotifyCheck(
+        ClientRegistry $clientRegistry,
+        ManagerRegistry $doctrine,
+        SessionInterface $session,
+        LoggerInterface $logger,
+        JWTTokenManagerInterface $JWTTokenManager,
+        RefreshTokenManagerInterface $refreshTokenManager,
+        RefreshTokenGeneratorInterface $refreshTokenGenerator
+    ): RedirectResponse
     {
 
-        $token = $session->get('token');
+        $client = $clientRegistry->getClient('spotify');
 
+        // 1) Solo UNA llamada para obtener el objeto AccessToken
+        $accessTokenObject = $client->getAccessToken();
+        $spotifyAccessToken = $accessTokenObject->getToken();
+        $spotifyRefreshToken = $accessTokenObject->getRefreshToken();
+
+        // 2) A partir de ese mismo token, obtener el usuario
+        $spotifyUser = $client->fetchUserFromToken($accessTokenObject);
+
+
+        $spotifyId   = $spotifyUser->getId();
+        $email       = $spotifyUser->getEmail();        // requiere scope user-read-email
+        $displayName = $spotifyUser->getDisplayName();
+        $images = $spotifyUser->getImages();
+        $product = $spotifyUser->getProduct();
+
+        $profilePic = $images[0] ?? null;
+
+        if($profilePic){
+            $profilePic = $profilePic['url'];
+        }
+        // 2) buscar o crear tu Artist
+        $em = $doctrine->getManager();
+        $artistRepo = $em->getRepository(Artist::class);
+        $artist = $artistRepo->findOneBy(['spotifyId' => $spotifyId]);
+        if (!$artist) {
+            $artist = $artistRepo->findOneBy(['username' => $email]);
+            if(!$artist) {
+                $artist = new Artist();
+                $artist->setSpotifyId($spotifyId);
+                $artist->setEmail($email);
+                $artist->setName($displayName);
+                $artist->setProfilePic($profilePic);
+                $artist->setRoles(['ROLE_USER']);
+                $artist->setRefreshToken($spotifyRefreshToken);
+                $artist->setProduct($product);
+            } else {
+                $artist->setSpotifyId($spotifyId);
+                $artist->setProfilePic($profilePic);
+                $artist->setRefreshToken($spotifyRefreshToken);
+                $artist->setProduct($product);
+            }
+
+            $em->persist($artist);
+            $em->flush();
+        }
+
+        $artist->setRefreshToken($spotifyRefreshToken);
+        $artist->setRoles(['ROLE_USER']);
+        $em->persist($artist);
+        $em->flush();
+
+
+        $session->set('spotifyAccessToken', $spotifyAccessToken);
+        $session->set('spotifyRefreshToken', $spotifyRefreshToken);
+
+
+        $jwtToken = $JWTTokenManager->create($artist);
+        $refreshToken = $refreshTokenGenerator->createForUserWithTtl($artist, 86400);
+        $refreshTokenManager->save($refreshToken);
+
+        return $this->redirect('http://localhost:4200/login-success?token=' . $jwtToken.'&refreshToken=' . $refreshToken);
+    }
+
+    #[Route('/spotifyToken', name: 'spotifyToken')]
+    public function spotifyToken(TokenStorageInterface $tokenStorage){
+        $token =  $tokenStorage->getToken()->getAttribute('spotify_access_token');
         if (!$token) {
             return $this->json(['error' => 'No token available'], Response::HTTP_UNAUTHORIZED);
         }
 
         return $this->json(['token' => $token]);
     }
-
-    #[Route('/callback', name: 'callback')]
-    public function callback(Request $request,SessionInterface $session,ManagerRegistry $doctrine, TokenStorageInterface $tokenStorage): Response
-    {
-        $clientId = $this->getParameter('clientId');
-        $clientSecret = $this->getParameter('clientSecret');
-        $code = $request->query->get('code');
-
-        if (!$code) {
-            return new Response('', Response::HTTP_FORBIDDEN);
-        }
-
-        $response = $this->httpClient->request('POST', 'https://accounts.spotify.com/api/token', [
-            'body' => [
-                'grant_type' => 'authorization_code',
-                'code' => $code,
-                'redirect_uri' => $this->redirectUri,
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-            ],
-        ]);
-
-        $data = json_decode($response->getContent(), true);
-
-        if (isset($data['access_token'])) {
-            $accessToken = $data['access_token'];
-            $refreshToken = $data['refresh_token'];
-            $expiresIn = $data['expires_in'] ?? 3600;
-
-            $userResponse = $this->httpClient->request('GET', 'https://api.spotify.com/v1/me', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $accessToken,
-                ],
-            ]);
-
-            $userData = json_decode($userResponse->getContent(), true);
-
-            $email = $userData['email'] ?? null;
-            $spotifyId = $userData['id'] ?? null;
-            $profileImages = $userData['images'] ?? [];
-            $displayName = $userData['display_name'] ?? null;
-
-            if (!$email || !$spotifyId) {
-                return new Response('Email o Spotify ID no pueden ser nulos.', Response::HTTP_FORBIDDEN);
-            }
-
-            $profileImageUrl = !empty($profileImages) ? $profileImages[0]['url'] : null;
-
-            $session->set('imagen', $profileImageUrl);
-            $session->set('correoElectronico', $email);
-            $session->set('token', $accessToken);
-            $session->set('refresh_token', $refreshToken);
-
-            $artist = $doctrine->getRepository(Artist::class)->findOneBy(['email' => $email]);
-
-            if(!$artist){
-                $artist = new Artist();
-                $artist->setEmail($email);
-                $artist->setName($displayName);
-
-                $doctrine->getManager()->persist($artist);
-                $doctrine->getManager()->flush();
-            }
-
-
-            $token = new UsernamePasswordToken($artist, 'main', $artist->getRoles());
-            $tokenStorage->setToken($token);
-            $session->set('_security_main', serialize($token));
-
-            return $this->redirectToRoute('app_page');
-        } else {
-            return new Response('Ha habido un problema con el inicio de sesion', Response::HTTP_FORBIDDEN);
-        }
-    }
-
-
 }

@@ -26,6 +26,17 @@ class Artist implements UserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $spotifyId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $profilePic = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $refreshToken = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $product = null;
     /**
      * @var list<string> The user roles
      */
@@ -71,6 +82,26 @@ class Artist implements UserInterface
 
         return $this;
     }
+
+    public function getProduct(){
+        return $this->product;
+    }
+
+    public function setProduct(string $product){
+        $this->product = $product;
+    }
+
+
+    public function getRefreshToken(): ?string
+    {
+        return $this->refreshToken;
+    }
+
+    public function setRefreshToken(?string $refreshToken): void
+    {
+        $this->refreshToken = $refreshToken;
+    }
+
     /**
      * @see UserInterface
      * @return list<string>
@@ -162,4 +193,25 @@ class Artist implements UserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public function setSpotifyId(mixed $spotifyId)
+    {
+        $this->spotifyId = $spotifyId;
+    }
+
+    public function getSpotifyId(): ?string
+    {
+        return $this->spotifyId;
+    }
+
+    public function getProfilePic(): ?string
+    {
+        return $this->profilePic;
+    }
+
+    public function setProfilePic(?string $profilePic): void
+    {
+        $this->profilePic = $profilePic;
+    }
+
 }

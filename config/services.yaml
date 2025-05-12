@@ -30,6 +30,15 @@ services:
         arguments:
             $accessTokenProvider: '@App\Services\AccessTokenProvider'
             $refreshTokenProvider: '@App\Services\RefreshTokenProvider'
+    App\Services\SpotifyApiClient:
+        arguments:
+            $spotifyClient: '@knpu.oauth2.client.spotify'
+    App\Controller\PageController:
+        arguments:
+            $apiKey: '%env(RAPID_API_KEY)%'
+    App\EventListener\JWTCreatedListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
