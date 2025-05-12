@@ -35,6 +35,7 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/api/popularArtists, roles: PUBLIC_ACCESS}
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS}
         - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
 
 
