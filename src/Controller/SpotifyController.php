@@ -118,7 +118,7 @@ class SpotifyController extends AbstractController
         $refreshToken = $refreshTokenGenerator->createForUserWithTtl($artist, 86400);
         $refreshTokenManager->save($refreshToken);
 
-        return $this->redirect('http://localhost:4200/login-success?token=' . $jwtToken.'&refreshToken=' . $refreshToken);
+        return $this->redirect('https://pruebaspotify.netlify.app/login-success?token=' . $jwtToken.'&refreshToken=' . $refreshToken);
     }
 
     #[Route('/spotifyToken', name: 'spotifyToken')]
