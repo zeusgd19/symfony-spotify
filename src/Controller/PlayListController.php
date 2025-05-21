@@ -27,21 +27,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class PlayListController extends AbstractController
 {
 
-    #[Route('/user/profile', name: 'app_user')]
-    public function spotifyProfile(Request $request){
-        $authHeader = $request->headers->get('Authorization');
-        $user = $this->getUser();
-        if(!$user){
-            return $this->json(['error' => 'No token available'], Response::HTTP_UNAUTHORIZED);
-        }
-        return new JsonResponse([
-            'email' => $user->getEmail(),
-            'roles' => $user->getRoles(),
-            'profilePic' => $user->getProfilePic(),
-            'product' => $user->getProduct(),
-        ]);
-    }
-
     #[Route('/test-token')]
     public function testToken(TokenStorageInterface $tokenStorage): JsonResponse
     {
@@ -59,32 +44,6 @@ class PlayListController extends AbstractController
     {
         return $this->json([
             'headers' => $request->headers->all()
-        ]);
-    }
-
-    #[Route('/popularArtists', name: 'popular_artists')]
-    public function popularArtists(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse
-    {
-//        $expired = $sessionRefresher->isExpired();
-//        if($expired){
-//            $sessionRefresher->refreshSession($this->getUser());
-//        }
-        $header = $request->headers->get('Authorization');
-        $jwt = substr($header, 7);
-        $popularArtists = $spotifyApiClient->getTopArtists($jwt);
-
-        $data = [];
-        $artists = [];
-        foreach ($popularArtists as $popularArtist) {
-            $data['id'] = $popularArtist['id'];
-            $data['name'] = $popularArtist['name'];
-            $data['uri'] = $popularArtist['uri'];
-            $data['image'] = $popularArtist['images'][0]['url'];
-            $artists[] = $data;
-        }
-
-        return $this->json([
-            'artists' => $artists
         ]);
     }
 
@@ -121,45 +80,6 @@ class PlayListController extends AbstractController
         return $response;
     }
 
-    #[Route('/artist/{artistId}', name: 'app_songs_by_artist')]
-    public function songsByArtists(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse
-    {
-        $header = $request->headers->get('Authorization');
-        $jwt = substr($header, 7);
-        $artistId = $request->get('artistId');
-        $songs = $spotifyApiClient->getTracksByArtist($jwt, $artistId);
-        $artist = $spotifyApiClient->getArtist($jwt, $artistId);
-        $tracks = $songs->tracks;
-
-        $data = [];
-        $tracksArray = [];
-
-        $artistData['id'] = $artist->id;
-        $artistData['name'] = $artist->name;
-        $artistData['uri'] = $artist->uri;
-        $artistData['image'] = $artist->images[0]->url;
-        foreach ($tracks as $track) {
-            $data['id'] = $track->id;
-            $data['name'] = $track->name;
-            $data['uri'] = $track->uri;
-            $data['album'] = $track->album;
-            $data['duration_ms'] = $track->duration_ms;
-            $tracksArray[] = $data;
-        }
-//        return new JsonResponse([
-//            'id' => $tracks['id'],
-//            'name' => $tracks['name'],
-//            'duration_ms' => $tracks['duration_ms'],
-//            'uri' => $tracks['uri'],
-//            'album' => $tracks['album'],
-//        ]);
-
-        return $this->json([
-            'songs' => $tracksArray,
-            'artist' => $artistData
-        ]);
-    }
-
     #[Route('/myPlaylists', name: 'my_play_list')]
     public function myPlaylists(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse{
         $header = $request->headers->get('Authorization');
@@ -179,6 +99,32 @@ class PlayListController extends AbstractController
         */
         return $this->json([
             'playlists' => $playlists
+        ]);
+    }
+
+    #[Route('/myTracks', name: 'my_play_list')]
+    public function myTracks(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse {
+        $header = $request->headers->get('Authorization');
+        $jwt = substr($header, 7);
+
+        $tracks = $spotifyApiClient->getMyTracks($jwt);
+
+        $data = [];
+        $tracksArray = [];
+
+
+        foreach ($tracks as $track) {
+            $data['id'] = $track->track->id;
+            $data['name'] = $track->track->name;
+            $data['uri'] = $track->track->uri;
+            $data['duration_ms'] = $track->track->duration_ms;
+            $data['artist'] = $track->track->artists;
+            $data['album'] = $track->track->album;
+            $tracksArray[] = $data;
+        }
+
+        return $this->json([
+            'tracks' => $tracksArray
         ]);
     }
 

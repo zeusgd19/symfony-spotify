@@ -29,6 +29,7 @@ class PageController extends AbstractController
     public function index(SessionInterface $session, SpotifyApiClient $spotifyService, Request $request): Response
     {
 
+        /*
         if($this->getUser()){
             $results = $spotifyService->getTopArtists();
             $profilePic = $this->getUser()->getProfilePic();
@@ -50,6 +51,9 @@ class PageController extends AbstractController
                 'albums' => $albums ?? []
             ]);
         }
+        */
+
+        return $this->render('admin/index.html.twig');
     }
 
     #[Route('/login', name: 'app_login')]

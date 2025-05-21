@@ -10,18 +10,20 @@ security:
                 class: App\Entity\Artist
                 property: email
     firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+        refresh:
+            pattern: ^/api/token/refresh
+            provider: app_user_provider
+            stateless: true
+            refresh_jwt:
+                check_path: gesdinet_jwt_refresh_token
         main:
             pattern: ^/api/
             provider: app_user_provider
             stateless: true
             jwt: ~
-        refresh:
-            provider: app_user_provider
-            refresh_jwt:
-                check_path: gesdinet_jwt_refresh_token
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -34,7 +36,8 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
-        - { path: ^/api/popularArtists, roles: PUBLIC_ACCESS}
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
+        - { path: ^/api/popularArtists, roles: PUBLIC_ACCESS }
         - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
 
 

@@ -95,6 +95,14 @@ class SpotifyApiClient
 
     }
 
+    public function getMyTracks(string $jwt, int $limit = 8, string $timeRange = 'short_term')
+    {
+        $this->getValidAccessToken($jwt);
+        $response = $this->api->getMySavedTracks();
+
+        return $response->items;
+    }
+
     /** @return array */
     public function getTopTracks(string $jwt, int $limit = 5, string $timeRange = 'short_term'): array
     {
