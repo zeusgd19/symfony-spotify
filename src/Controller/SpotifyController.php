@@ -84,7 +84,7 @@ class SpotifyController extends AbstractController
         $artistRepo = $em->getRepository(Artist::class);
         $artist = $artistRepo->findOneBy(['spotifyId' => $spotifyId]);
         if (!$artist) {
-            $artist = $artistRepo->findOneBy(['username' => $email]);
+            $artist = $artistRepo->findOneBy(['name' => $email]);
             if(!$artist) {
                 $artist = new Artist();
                 $artist->setSpotifyId($spotifyId);
