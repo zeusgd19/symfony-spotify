@@ -80,29 +80,27 @@ class PlayListController extends AbstractController
         return $response;
     }
 
-    #[Route('/myPlaylists', name: 'my_play_list')]
+    #[Route('/myPlaylists')]
     public function myPlaylists(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse{
         $header = $request->headers->get('Authorization');
         $jwt = substr($header, 7);
-        $playlists = $spotifyApiClient->getPlaylistsWithTopTracks($jwt);
+        $playlists = $spotifyApiClient->getMyPlaylists($jwt);
 
         $data = [];
-        $artists = [];
-        /*
-        foreach ($playlists as $playlits) {
-            $data['id'] = $playlits->id;
-            $data['name'] = $playlits->name;
-            $data['uri'] = $playlits->uri;
-            $data['image'] = $playlits->images[0]->url;
-            $artists[] = $data;
+        $playlistsData = [];
+        foreach ($playlists as $playlist) {
+            $data['name'] = $playlist->name;
+            $data['owner'] = $playlist->owner->display_name;
+            $data['uri'] = $playlist->uri;
+            $data['image'] = $playlist->images[0]->url ?? '';
+            $playlistsData[] = $data;
         }
-        */
         return $this->json([
-            'playlists' => $playlists
+            'playlists' => $playlistsData
         ]);
     }
 
-    #[Route('/myTracks', name: 'my_play_list')]
+    #[Route('/myTracks', name: 'my_tracks')]
     public function myTracks(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse {
         $header = $request->headers->get('Authorization');
         $jwt = substr($header, 7);
@@ -206,7 +204,7 @@ class PlayListController extends AbstractController
             $dataSongs['uri'] = $track['uri'];
             $dataSongs['album'] = $track['album'];
             $dataSongs['duration_ms'] = $track['duration_ms'];
-            $dataSongs['artistsId'] = $track['artists'][0]['id'];
+            $dataSongs['artist'] = $track['artists'][0];
             $songs[] = $dataSongs;
         }
         return $this->json([
