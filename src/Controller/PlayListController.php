@@ -80,6 +80,31 @@ class PlayListController extends AbstractController
         return $response;
     }
 
+    #[Route('/playlist/{id}/tracks', name: 'app_get_play_list')]
+    public function getPlaylist(String $id, SpotifyApiClient $spotifyApiClient,  Request $request): JsonResponse
+    {
+        $header = $request->headers->get('Authorization');
+        $jwt = substr($header, 7);
+        $playlistTrack = $spotifyApiClient->getPlaylistTracks($jwt, $id);
+
+        $data = [];
+        $tracks = [];
+
+        foreach ($playlistTrack as $track) {
+            $data['id'] = $track->track->id;
+            $data['name'] = $track->track->name;
+            $data['uri'] = $track->track->uri;
+            $data['duration_ms'] = $track->track->duration_ms;
+            $data['artist'] = $track->track->artists;
+            $data['album'] = $track->track->album;
+            $tracks[] = $data;
+        }
+        return $this->json([
+            'tracks' => $tracks
+            ]
+        );
+    }
+
     #[Route('/myPlaylists')]
     public function myPlaylists(SpotifyApiClient $spotifyApiClient, Request $request): JsonResponse{
         $header = $request->headers->get('Authorization');
@@ -89,6 +114,7 @@ class PlayListController extends AbstractController
         $data = [];
         $playlistsData = [];
         foreach ($playlists as $playlist) {
+            $data['id'] = $playlist->id;
             $data['name'] = $playlist->name;
             $data['owner'] = $playlist->owner->display_name;
             $data['uri'] = $playlist->uri;
